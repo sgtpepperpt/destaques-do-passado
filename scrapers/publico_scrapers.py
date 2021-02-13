@@ -7,13 +7,25 @@ from scrapers.news_scraper import NewsScraper
 
 def ignore_title(title):
     starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
-              'Vídeo:', 'Público lança', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo']
+              'Vídeo:', 'Público lança', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
+              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:']
     for forbidden in starts:
-        if title.startswith(forbidden):
+        if title.lower().startswith(forbidden.lower()):
             return True
     return False
 
-# TODO some titles with italic don't show those because it's text inside <i> tags
+
+# Extracts a title from an element containing it. Removes markup such as <b> and <i> tags,
+# as well as the hour at the beginning.
+def extract_title(elem):
+    text = elem.get_text().strip()
+
+    match_hour = re.findall(r'[012][0-9]:[0-9][0-9]\s*-(.*)', text)
+    if len(match_hour) > 0:
+        text = match_hour[0].strip()
+
+    return re.sub(r' +', ' ', text)
+
 
 # TODO adicionar alguns snippets dos anos 90 a mao
 class ScraperPublico01(NewsScraper):
@@ -39,7 +51,7 @@ class ScraperPublico01(NewsScraper):
             'article_url': url,
             'img_url': img_src,
             'headline': head,
-            'title': clean_special(destaque.get_text()),
+            'title': extract_title(destaque),
             'snippet': prettify_text(snippet),
             'category': 'Destaque'
         })
@@ -60,7 +72,7 @@ class ScraperPublico01(NewsScraper):
             all_news.append({
                 'article_url': title['href'],
                 'headline': article.get_text(),
-                'title': clean_special(title.get_text()),
+                'title': extract_title(title),
                 'category': category
             })
 
@@ -109,7 +121,7 @@ class ScraperPublico02(NewsScraper):
             'article_url': destaque['href'],
             'img_url': img_src,
             'headline': clean_special(head),
-            'title': clean_special(destaque.get_text()),
+            'title': extract_title(destaque),
             'snippet': prettify_text(snippet.get_text()),
             'category': 'Destaque'
         })
@@ -136,7 +148,7 @@ class ScraperPublico02(NewsScraper):
         all_news.append({
             'article_url': destaque_2_title['href'],
             'img_url': img_src,
-            'title': clean_special(destaque_2_title.get_text()),
+            'title': extract_title(destaque_2_title),
             'snippet': prettify_text(destaque_2_snippet),
             'category': 'Destaque'
         })
@@ -161,7 +173,7 @@ class ScraperPublico02(NewsScraper):
             all_news.append({
                 'article_url': title['href'],
                 'headline': article.find(text=True),
-                'title': clean_special(title.get_text()),
+                'title': extract_title(title),
                 'category': 'Desporto' if 'desporto.publico.pt' in title['href'] else 'Última hora'
             })
 
@@ -191,7 +203,7 @@ class ScraperPublico03(NewsScraper):
             all_news.append({
                 'article_url': title['href'],
                 'headline': clean_special(head),
-                'title': clean_special(title.find('strong').get_text()),
+                'title': extract_title(title.find('strong')),
                 'snippet': prettify_text(snippet),
                 'category': 'Destaque'
             })
@@ -207,14 +219,12 @@ class ScraperPublico03(NewsScraper):
             articles = seccao.find_all(id='seccaoTitulo')
             for article in articles:
                 title_elem = article.find('a')
-                title = title_elem.find(text=True)
+                title = extract_title(title_elem)
 
                 # sometimes the news title is "hidden", having no title
                 # (aka article probably removed and left an element as ghost)
                 if not title:
                     continue
-
-                title = clean_special(title)
 
                 if ignore_title(title):
                     continue
@@ -263,7 +273,7 @@ class ScraperPublico04(NewsScraper):
             snippet = title.find_next(class_='verdana_11_gray')
             all_news.append({
                 'article_url': title['href'],
-                'title': title.find(text=True),
+                'title': extract_title(title.find('b')),
                 'snippet': snippet.find(text=True),
                 'category': 'Destaque'
             })
@@ -272,7 +282,7 @@ class ScraperPublico04(NewsScraper):
         seccoes = news_table.find_all(class_='verdana_10_blue')
         for seccao in seccoes:
             title_elem = seccao.find('a')
-            title = title_elem.find(text=True)
+            title = extract_title(title_elem)
 
             if ignore_title(title):
                 continue
@@ -301,7 +311,7 @@ class ScraperPublico04(NewsScraper):
 
             seccao_table = seccao.find_parent('table').find_all(class_='verdana_10_blue')
             for article in [article.find('a') for article in seccao_table]:
-                title = article.find(text=True)
+                title = extract_title(article)
 
                 if ignore_title(title):
                     continue
@@ -340,7 +350,7 @@ class ScraperPublico05(NewsScraper):
 
             all_news.append({
                 'article_url': self.cleanup_url(title['href']),
-                'title': title.find(text=True),
+                'title': extract_title(title),
                 'snippet': snippet.find(text=True),
                 'img_url': img_src,
                 'category': 'Destaque'
@@ -361,7 +371,7 @@ class ScraperPublico05(NewsScraper):
             else:
                 snippet = snippet[0]
 
-            title = title_elem.find(text=True)
+            title = extract_title(title_elem)
             if ignore_title(title):
                 continue
 
@@ -392,7 +402,7 @@ class ScraperPublico05(NewsScraper):
                     if news['href'].startswith('https://arquivo.pt') and 'publico.pt/' not in news['href']:
                         continue
 
-                    title = news.find(text=True)
+                    title = extract_title(news)
                     if not title or ignore_title(title):
                         continue
 
@@ -423,7 +433,7 @@ class ScraperPublico05(NewsScraper):
 
             all_news.append({
                 'article_url': self.cleanup_url(feature['href']),
-                'title': feature.find(text=True),
+                'title': extract_title(feature),
                 'img_url': img_src,
                 'category': category
             })
@@ -434,7 +444,7 @@ class ScraperPublico05(NewsScraper):
                 title = article.find('a')
                 all_news.append({
                     'article_url': self.cleanup_url(title['href']),
-                    'title': title.get_text(),
+                    'title': extract_title(title),
                     'category': category
                 })
 
@@ -446,7 +456,7 @@ class ScraperPublico05(NewsScraper):
             for article in latest_news.find_all('li'):
                 title_elem = article.find('a')
 
-                title = title_elem.find(text=True, recursive=False)
+                title = extract_title(title_elem)
                 if ignore_title(title):
                     continue
 
@@ -501,7 +511,7 @@ class ScraperPublico06(NewsScraper):
 
             all_news.append({
                 'article_url': header.find('a')['href'],
-                'title': clean_special(str(header.find('h2').get_text())),
+                'title': extract_title(header.find('h2')),
                 'snippet': prettify_text(snippet or ''),
                 'img_url': img,
                 'category': 'Destaque'
@@ -512,7 +522,7 @@ class ScraperPublico06(NewsScraper):
                 for news in related.find_all('li'):
                     all_news.append({
                         'article_url': news.find('a')['href'],
-                        'title': clean_special(news.find('a').find(text=True)),
+                        'title': extract_title(news.find('a')),
                         'category': 'Outras'
                     })
 
@@ -532,7 +542,7 @@ class ScraperPublico06(NewsScraper):
 
                 all_news.append({
                     'article_url': self.cleanup_url(title['href']),
-                    'title': feature_box.find(class_='entry-title').get_text(),
+                    'title': extract_title(feature_box.find(class_='entry-title')),
                     'img_url': img,
                     'category': category
                 })
@@ -542,7 +552,7 @@ class ScraperPublico06(NewsScraper):
             for other in others:
                 all_news.append({
                     'article_url': self.cleanup_url(other.find('a')['href']),
-                    'title': str(other.find('a').get_text()),
+                    'title': extract_title(other.find('a')),
                     'category': category
                 })
 
