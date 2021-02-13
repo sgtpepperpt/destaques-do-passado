@@ -6,9 +6,10 @@ from bs4 import BeautifulSoup
 class ScraperCentral:
     __scrapers = defaultdict(list)
 
-    def register_scraper(self, source, scraper):
-        self.__scrapers[source].append(scraper())
-        self.__scrapers[source].sort()
+    def register_scraper(self, scraper):
+        s = scraper()
+        self.__scrapers[s.source].append(scraper())
+        self.__scrapers[s.source].sort()
 
     def scrape_page(self, source, date, page_content):
         for scraper in self.__scrapers[source]:

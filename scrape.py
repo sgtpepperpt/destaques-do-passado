@@ -5,6 +5,9 @@ from enum import Enum
 
 from scrapers.google_news_scrapers import *
 from scrapers.news_scraper import ScraperCentral
+from scrapers.publico_scrapers import ScraperPublico01, ScraperPublico02, ScraperPublico03, ScraperPublico04, \
+    ScraperPublico05, ScraperPublico06
+from util import make_absolute
 
 
 class Category(Enum):
@@ -12,21 +15,37 @@ class Category(Enum):
     SPORTS = 'Desporto'
     NATIONAL = 'Portugal'
     WORLD = 'Mundo'
-    BUSINESS = 'Negócios'
+    BUSINESS = 'Economia'
     ENTERTAINMENT = 'Entretenimento'
     SCIENCE = 'Ciência'
     HEALTH = 'Saúde'
+    POLITICS = 'Política'
+    CULTURE = 'Cultura'
+    EDUCATION = 'Educação'
+    TECHNOLOGY = 'Tecnologia'
+    SOCIETY = 'Sociedade'
+    LOCAL = 'Local'
+    ENVIRONMENT = 'Ambiente'
+    OPINION = 'Opinião'
 
 
 category_bindings = {
-    ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias'): Category.GENERIC,
+    ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias', 'Destaque', 'Última hora', 'Outras'): Category.GENERIC,
     ('Portugal', ): Category.NATIONAL,
     ('Mundo', 'Internacional'): Category.WORLD,
     ('Desporto', 'Esportes'): Category.SPORTS,
-    ('Negócios',): Category.BUSINESS,
+    ('Negócios', 'Economia'): Category.BUSINESS,
     ('Entretenimento',): Category.ENTERTAINMENT,
-    ('Ciência',): Category.SCIENCE,
-    ('Saúde',): Category.HEALTH
+    ('Ciência', 'Ciências'): Category.SCIENCE,
+    ('Saúde',): Category.HEALTH,
+    ('Política',): Category.POLITICS,
+    ('Cultura',): Category.CULTURE,
+    ('Educação',): Category.EDUCATION,
+    ('Tecnologia',): Category.TECHNOLOGY,
+    ('Sociedade',): Category.SOCIETY,
+    ('Local',): Category.LOCAL,
+    ('Ambiente', 'Ecosfera'): Category.ENVIRONMENT,
+    ('Opinião',): Category.OPINION
 }
 
 
@@ -34,12 +53,12 @@ def bind_category(category_text):
     cat_dict = {}
     for k, v in category_bindings.items():
         for key in k:
-            cat_dict[key] = v
+            cat_dict[key.lower()] = v
 
-    if category_text not in cat_dict:
+    if category_text.lower() not in cat_dict:
         raise Exception('Unknown category: ' + category_text)
 
-    return cat_dict[category_text]
+    return cat_dict[category_text.lower()]
 
 
 def bind_source(source_text):
@@ -48,11 +67,26 @@ def bind_source(source_text):
     return source_text
 
 
+def source_name(source):
+    sources = {
+        'publico.pt': 'Público',
+        'ultimahorapublico.pt': 'Público',
+    }
+
+    return sources[source]
+
+
 def scrape(source):
     scraper = ScraperCentral()
-    scraper.register_scraper(source, ScraperGoogleNews01)
-    scraper.register_scraper(source, ScraperGoogleNews02)
-    scraper.register_scraper(source, ScraperGoogleNews03)
+    scraper.register_scraper(ScraperGoogleNews01)
+    scraper.register_scraper(ScraperGoogleNews02)
+    scraper.register_scraper(ScraperGoogleNews03)
+    scraper.register_scraper(ScraperPublico01)
+    scraper.register_scraper(ScraperPublico02)
+    scraper.register_scraper(ScraperPublico03)
+    scraper.register_scraper(ScraperPublico04)
+    scraper.register_scraper(ScraperPublico05)
+    scraper.register_scraper(ScraperPublico06)
 
     all_news = []
     all_cat = Counter()
@@ -64,14 +98,26 @@ def scrape(source):
         date = filename.split('-')[0]
         is_https = filename.split('-')[1] == 's'
 
+        # TODO dev only
+        if int(date) < 20060910150634:
+            continue
+
         with open(file) as f:
             content = f.read()
 
         news = scraper.scrape_page(source, date, content)
-        if len(news) < 5:
+        if len(news) < 3:
             raise Exception('So few news here!')
 
         for n in news:
+            n['article_url'] = make_absolute(source, date, is_https, n['article_url'])
+            print(n)
+
+            # source is only present for news aggregators
+            if 'source' not in n:
+                n['source'] = source_name(source)
+
+            # bind to common categorisations
             n['category'] = bind_category(n['category']).value
             n['source'] = bind_source(n['source'])
 
@@ -81,7 +127,7 @@ def scrape(source):
 
             # for internal processing purposes, shouldn't be on final output file
             n['ts'] = date
-            n['original_article_url'] = get_original_news_link(n['article_url'])
+            n['original_article_url'] = get_original_news_link(n['article_url']) if n['article_url'] else ''
 
             all_cat[n['category']] += 1
             all_source[n['source']] += 1
@@ -97,5 +143,5 @@ def scrape(source):
     print(len(all_news))
 
 
-scrape('news.google.pt')
-#scrape('publico.pt')
+#scrape('news.google.pt')
+scrape('publico.pt')

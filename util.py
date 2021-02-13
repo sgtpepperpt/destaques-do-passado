@@ -2,7 +2,8 @@ import re
 
 
 def clean_special(str):
-    return re.sub(r"\W+$", "", str.strip())
+    #TODO nao apagar citacoes
+    return re.sub(r"\W+$", "", str.strip().replace('(em actualização)', '').replace('(com vídeo)', ''))
 
 
 def prettify_text(text):
@@ -31,3 +32,41 @@ def is_https_link(link):
 
 def split_date(date):
     return date[:4], date[4:6], date[6:8]
+
+
+def make_absolute(source, date, is_https, url):
+    if not url or len(url) == 0:
+        return ''
+
+    possible = r'(https://arquivo\.pt)?(/)?(noFrame/replay)?(/)?([0-9]*)?(/)?(https?://[^/]*)?(/)?(.*)?'
+    match = re.findall(possible, url)
+
+    final = ''
+    if not match[0][0]:
+        final += 'https://arquivo.pt'
+
+    if not match[0][1]:
+        final += '/'
+
+    if not match[0][2]:
+        final += 'noFrame/replay'
+
+    if not match[0][3]:
+        final += '/'
+
+    if not match[0][4]:
+        final += date
+
+    if not match[0][5]:
+        final += '/'
+
+    if not match[0][6]:
+        final += 'http{}://{}'.format('s' if is_https else '', source)
+
+    if not match[0][7]:
+        final += '/'
+
+    if not match[0][8]:
+        raise Exception('Error in absolute url')
+
+    return final + url

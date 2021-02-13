@@ -6,6 +6,7 @@ from scrapers.news_scraper import NewsScraper
 
 
 class ScraperGoogleNews01(NewsScraper):
+    source = 'news.google.pt'
     cutoff = 20081021122326
 
     def scrape_page(self, soup):
@@ -50,6 +51,7 @@ class ScraperGoogleNews01(NewsScraper):
 
 
 class ScraperGoogleNews02(NewsScraper):
+    source = 'news.google.pt'
     cutoff = 20111102160207
 
     def scrape_page(self, soup):
@@ -96,6 +98,7 @@ class ScraperGoogleNews02(NewsScraper):
 
 
 class ScraperGoogleNews03(NewsScraper):
+    source = 'news.google.pt'
     cutoff = 20131107170219  # we only tested up to here
 
     def scrape_page(self, soup):
