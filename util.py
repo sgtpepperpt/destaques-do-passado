@@ -2,7 +2,7 @@ import re
 
 
 def clean_special(str):
-    #TODO nao apagar citacoes
+    # TODO nao apagar citacoes
     return re.sub(r"\W+$", "", str.strip().replace('(em actualização)', '').replace('(com vídeo)', ''))
 
 

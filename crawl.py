@@ -11,7 +11,7 @@ from util import is_https_link
 
 news_sources = [
     {'site': 'news.google.pt', 'from': '20051124000000'},
-    {'site': 'publico.pt', 'from': '20010418153431', 'special': {'20100910150634': '?fl=1', '20110703150815': '?mobile=no'}},
+    {'site': 'publico.pt', 'special': {'20100910150634': '?fl=1', '20110703150815': '?mobile=no'}},
     {'site': 'ultimahora.publico.pt'},
     {'site': 'sabado.pt'},
     {'site': 'diariodigital.pt'},
@@ -39,6 +39,9 @@ news_sources = [
 
     # regional
     {'site': 'dnoticias.pt'},
+
+    # musica
+    {'site': 'blitz.pt'},
 
     # economia
     {'site': 'dinheirovivo.pt'},
