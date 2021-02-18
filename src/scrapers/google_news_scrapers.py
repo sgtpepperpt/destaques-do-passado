@@ -1,8 +1,8 @@
 import re
 
-from util import prettify_text, is_link_pt, clean_special, get_original_news_link
+from src.util import prettify_text, is_link_pt, clean_special
 
-from scrapers.news_scraper import NewsScraper
+from src.scrapers.news_scraper import NewsScraper
 
 
 class ScraperGoogleNews01(NewsScraper):

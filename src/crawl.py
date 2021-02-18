@@ -1,13 +1,12 @@
 import json
 import os
-import random
 from collections import Counter
 
 import chardet
 import requests
 import pathlib
 
-from util import is_https_link
+from src.util import is_https_link
 
 news_sources = [
     {'site': 'news.google.pt', 'from': '20051124000000'},

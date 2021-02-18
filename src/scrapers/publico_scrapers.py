@@ -1,9 +1,9 @@
 import re
 from enum import Enum
 
-from util import prettify_text, clean_special
+from src.util import prettify_text, clean_special
 
-from scrapers.news_scraper import NewsScraper
+from src.scrapers.news_scraper import NewsScraper
 
 
 class Importance(str, Enum):

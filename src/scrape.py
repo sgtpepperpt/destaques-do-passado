@@ -1,19 +1,15 @@
-import json
 import os
 import pathlib
-from collections import Counter
-from enum import Enum
-import csv
 import sqlite3
-from collections import defaultdict
+from enum import Enum
 
 import requests
 
-from scrapers.google_news_scrapers import *
-from scrapers.news_scraper import ScraperCentral
-from scrapers.publico_scrapers import ScraperPublico01, ScraperPublico02, ScraperPublico03, ScraperPublico04, \
+from src.scrapers.google_news_scrapers import *
+from src.scrapers.news_scraper import ScraperCentral
+from src.scrapers.publico_scrapers import ScraperPublico01, ScraperPublico02, ScraperPublico03, ScraperPublico04, \
     ScraperPublico05, ScraperPublico06, ScraperPublico07
-from util import make_absolute
+from src.util import *
 
 
 class Category(Enum):
