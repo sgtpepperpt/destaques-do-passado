@@ -1,4 +1,5 @@
 import re
+import uuid
 from enum import Enum
 
 from src.util import prettify_text, clean_special
@@ -467,7 +468,7 @@ class ScraperPublico06(NewsScraper):
                     article_url = self.cleanup_url(news['href'])
                     # handle a special case where the site didn't have a link for the article
                     if len(article_url) == 0:
-                        continue
+                        article_url = 'no-article-url' + str(uuid.uuid4())
 
                     all_news.append({
                         'article_url': article_url,
@@ -571,6 +572,10 @@ class ScraperPublico07(NewsScraper):
 
     def get_main_article(self, article):
         if article.find_parent(class_='entries-collection'):
+            return
+
+        # ignore articles whose content is a video
+        if article.find(attrs={'data-fonte': 'VIDEO_SIMPLES'}):
             return
 
         header = article.find('header')

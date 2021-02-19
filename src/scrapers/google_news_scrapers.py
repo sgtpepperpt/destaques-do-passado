@@ -36,13 +36,13 @@ class ScraperGoogleNews01(NewsScraper):
 
             snippet_elem = link.next_sibling.next_sibling.next_sibling.next_sibling
             if snippet_elem.name == 'font':
-                snippet = snippet_elem.get_text()
+                snippet = prettify_text(snippet_elem.get_text())
 
             news = {
                 'article_url': url,
                 'title': title.get_text(),
                 'source': source,
-                'snippet': prettify_text(snippet),
+                'snippet': snippet,
                 'category': category
             }
 
