@@ -2,7 +2,7 @@ import re
 import uuid
 from enum import Enum
 
-from src.util import prettify_text, clean_special
+from src.util import prettify_text, clean_special, ignore_title
 
 from src.scrapers.news_scraper import NewsScraper
 
@@ -15,16 +15,6 @@ class Importance(str, Enum):
     CATEGORY_LARGE: str = 2
     CATEGORY_SMALL: str = 1
     RELATED: str = 0
-
-
-def ignore_title(title):
-    starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
-              'Vídeo:', 'Público lança', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
-              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home']
-    for forbidden in starts:
-        if title.lower().startswith(forbidden.lower()):
-            return True
-    return False
 
 
 # Extracts a title from an element containing it. Removes markup such as <b> and <i> tags,

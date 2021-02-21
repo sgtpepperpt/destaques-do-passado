@@ -47,6 +47,7 @@ def main():
     snippet = []
     img = []
     categories_over_5 = []
+    categories_over_2 = []
 
     for day, month in days:
         print('{:02}/{:02}'.format(day, month))
@@ -56,6 +57,7 @@ def main():
         snippet.append(stats['snippets'])
         img.append(stats['imgs'])
         categories_over_5.append(len([c for c in stats['categories'] if stats['categories'][c] > 5]))
+        categories_over_2.append(len([c for c in stats['categories'] if stats['categories'][c] > 2]))
 
         # write file
         res = cursor.execute('''SELECT article_url,arquivo_source_url,title,source,year,category,importance,headline,snippet,img_url,
@@ -82,11 +84,11 @@ def main():
         # write to file
         with open('out/{:02}{:02}.json'.format(month, day), 'w', newline='') as file:
             file.write(json.dumps({
-                'stats': stats,
-                'data': daily_news
+                'metadata': stats,
+                'articles': daily_news
             }))
     conn.close()
 
-    print('{} {} {} {}'.format(min(totals), min(snippet), min(img), min(categories_over_5)))
+    print('{} {} {} {} {}'.format(min(totals), min(snippet), min(img), min(categories_over_5), min(categories_over_2)))
 
 main()

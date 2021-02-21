@@ -6,7 +6,7 @@ def clean_spacing(text):
 
 
 def remove_clutter(text):
-    clutter = ['(em actualização)', '(em atualização)', '(com vídeo)', 'PORTUGAL:']
+    clutter = ['(em actualização)', '(em atualização)', '(com vídeo)', '[com vídeo]', 'PORTUGAL:']
     for elem in clutter:
         text = text.replace(elem, '')
 
@@ -37,6 +37,10 @@ def prettify_text(text):
         had_period = True
         text = text[:-1].strip()
 
+    # remove terminating comma
+    if text[-1] == ',':
+        text = text[:-1].strip()
+
     # remove Odivelas, 11 jun (Lusa) --
     groups = re.search(r'^[A-Za-z\s]+, [0-9]+ [A-Za-z]+ \(Lusa\) --? (.*)', text)
     if groups:
@@ -51,6 +55,16 @@ def prettify_text(text):
         text += '...'
 
     return text
+
+
+def ignore_title(title):
+    starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
+              'Vídeo:', 'Público lança', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
+              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home']
+    for forbidden in starts:
+        if title.lower().startswith(forbidden.lower()):
+            return True
+    return False
 
 
 def is_link_pt(link):

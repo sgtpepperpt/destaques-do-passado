@@ -1,6 +1,6 @@
 import re
 
-from src.util import prettify_text, is_link_pt, clean_special
+from src.util import prettify_text, is_link_pt, clean_special, ignore_title
 
 from src.scrapers.news_scraper import NewsScraper
 
@@ -24,6 +24,10 @@ class ScraperGoogleNews01(NewsScraper):
             if not title:
                 continue
 
+            title = title.get_text()
+            if ignore_title(title):
+                continue
+
             # find news category from parent table
             category = clean_special(str(link.find_previous(class_='ks').next))
 
@@ -40,7 +44,7 @@ class ScraperGoogleNews01(NewsScraper):
 
             news = {
                 'article_url': url,
-                'title': title.get_text(),
+                'title': title,
                 'source': source,
                 'snippet': snippet,
                 'category': category
@@ -65,7 +69,7 @@ class ScraperGoogleNews02(NewsScraper):
                 continue
 
             title = story.find('h2', class_='title').find('a').get_text()
-            if not title:
+            if not title or ignore_title(title):
                 continue
 
             # find news category from parent table, two different versions on same layout
@@ -112,7 +116,7 @@ class ScraperGoogleNews03(NewsScraper):
                 continue
 
             title = story.find('span', class_='titletext').get_text()
-            if not title:
+            if not title or ignore_title(title):
                 continue
 
             # find news category from parent table

@@ -75,19 +75,23 @@ def scrape_source(scraper, source, cursor):
         for n in news:
             n['article_url'] = make_absolute(source, date, is_https, n['article_url'])
 
-            print(n)
-
-            # source is only present for news aggregators
+            # source is only present for news aggregators, so if not present deduce it from filename
             article_source = bind_source(n.get('source') or source_name_from_file(source))
 
             # bind category to a common set
             category = bind_category(n['category']).value
 
-            # add metadata to news object
+            # add the link to where we got the article from
             arquivo_source_url = 'https://arquivo.pt/wayback/{}/http{}://{}/'.format(date, 's' if is_https else '', source)
 
-            # this should be unique for each news article, thus indicating its uniqueness
+            # the original link to the article should be unique for each one, thus indicating its uniqueness
+            # (article_url does not work as two different snapshots would have different links)
             original_article_url = get_original_news_url(n['article_url'])
+
+            # convert noFrame url to wayback (with sidebar) for UI purposes
+            n['article_url'] = n['article_url'].replace('noFrame/replay', 'wayback')
+
+            print(n)
 
             # add article to DB
             cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (n['article_url'],))
@@ -108,6 +112,7 @@ def main():
     cursor = conn.cursor()
     create_database(cursor)
 
+    # init scraping machine
     scraper = ScraperCentral()
     scraper.register_scraper(ScraperGoogleNews01)
     scraper.register_scraper(ScraperGoogleNews02)
@@ -120,8 +125,11 @@ def main():
     scraper.register_scraper(ScraperPublico06)
     scraper.register_scraper(ScraperPublico07)
 
+    # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
     scrape_source(scraper, 'publico.pt', cursor)
+
+    # process urls
     # check_urls(cursor)
 
     conn.commit()

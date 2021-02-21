@@ -132,6 +132,32 @@ def get_snapshot_list_cdx(source):
     return snapshots
 
 
+def analyse_snapshot_list(snapshots):
+    months = Counter()
+    first = 2020
+    last = 0
+
+    for snapshot in snapshots:
+        day = snapshot['tstamp'][6:8]
+        month = snapshot['tstamp'][4:6]
+        year = snapshot['tstamp'][:4]
+
+        # get all historic months represented
+        # TODO
+        months[year + month] +=1
+
+        # get interval extremes
+        if int(year) < first:
+            first = int(year)
+        if int(year) > last:
+            last = int(year)
+
+    print('\tTotal snapshots {}'.format(len(snapshots)))
+    print('\tRange {}-{}'.format(first, last))
+
+    return first, last, months
+
+
 def crawl_source(source, download=True):
     print('Crawl ' + source['site'])
 
@@ -143,7 +169,7 @@ def crawl_source(source, download=True):
         pathlib.Path(page_dir).mkdir(parents=True, exist_ok=True)
 
     snapshots = get_snapshot_list_cdx(source)
-    print('\tTotal snapshots {}'.format(len(snapshots)))
+    stats = analyse_snapshot_list(snapshots)
 
     if len(snapshots) == 0:
         print('\tNo results')
@@ -151,19 +177,11 @@ def crawl_source(source, download=True):
 
     special_requests = source.get('special') or {}
 
-    first = 2020
-    last = 0
     downloads = 0
 
     days = Counter()
     for snapshot in snapshots:
-        year = int(snapshot['tstamp'][:4])
         calendar_day = snapshot['tstamp'][4:8]
-        if year < first:
-            first = year
-        if year > last:
-            last = year
-
         days[calendar_day] += 1
 
         if download:
@@ -194,10 +212,10 @@ def crawl_source(source, download=True):
 
     print('\tTotal downloaded {}'.format(downloads))
     # print('\tTotal reqs ' + str(reqs))
-    print('\tRange {}-{}'.format(first, last))
+
     print('\tCoverage {:.2%} ({})'.format(len(days)/366.0, len(days)))
 
-    return first, last, len(snapshots), days
+    return stats, len(snapshots), days
 
 
 def crawl_all(sources):
@@ -205,20 +223,22 @@ def crawl_all(sources):
     first = 2020
     last = 0
     total_snapshots = 0
+    all_months = Counter()
 
     for source in sources:
         res = crawl_source(source)
         if not res:
             continue
 
-        first_year, last_year, snapshots, days = res
+        stats, snapshots, days = res
 
-        if first_year < first:
-            first = first_year
-        if last_year > last:
-            last = last_year
+        if stats[0] < first:
+            first = stats[0]
+        if stats[1] > last:
+            last = stats[1]
 
         total_snapshots += snapshots
+        all_months += stats[2]
 
         all_days += days
 
@@ -226,6 +246,14 @@ def crawl_all(sources):
     print('Total snapshots {}'.format(total_snapshots))
     print('Total range {}-{}'.format(first, last))
     print('Total coverage {:.2%} ({})'.format(len(all_days)/366.0, len(all_days)))
+    print(sorted(all_months))
+
+    # for i in range(2000,2013):
+    #    count = 0
+    #    for k in all_months.keys():
+    #        if k.startswith(str(i)):
+    #            count += 1
+    #    print('{} coverage {:.2%} ({})'.format(i, count / 12.0, count))
 
 
 crawl_all(news_sources)
