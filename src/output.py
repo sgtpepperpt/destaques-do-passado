@@ -7,9 +7,9 @@ def count_category(cursor, day, month, category):
 
 
 def get_day_stats(cursor, day, month):
-    total_articles =  cursor.execute('SELECT COUNT(*) FROM articles WHERE day = ? AND month = ?', (day, month)).fetchall()[0][0]
+    total_articles = cursor.execute('SELECT COUNT(*) FROM articles WHERE day = ? AND month = ?', (day, month)).fetchall()[0][0]
     with_snippet = cursor.execute('SELECT COUNT(*) FROM articles WHERE day = ? AND month = ? AND snippet IS NOT NULL', (day, month)).fetchall()[0][0]
-    with_img = cursor.execute('SELECT COUNT(*) FROM articles WHERE day = ? AND month = ? AND img_url IS NOT NULL', (day, month)).fetchall()[0][0]
+    with_img = cursor.execute('SELECT COUNT(*) FROM articles WHERE day = ? AND month = ? AND img_url IS NOT NULL AND (SELECT status NOT IN (404,400,500,0) FROM urls WHERE url = img_url)', (day, month)).fetchall()[0][0]
 
     categories = {
         'Genérico': count_category(cursor, day, month, 'Genérico'),
@@ -30,11 +30,18 @@ def get_day_stats(cursor, day, month):
         'Opinião': count_category(cursor, day, month, 'Opinião')
     }
 
+    # only show categories with articles
+    categories = {k: v for (k, v) in categories.items() if v > 0}
+
+    years = cursor.execute('SELECT DISTINCT year FROM articles WHERE day = ? AND month = ?', (day, month)).fetchall()
+    years = [year[0] for year in years]
+
     return {
         'total': total_articles,
         'snippets': with_snippet,
         'imgs': with_img,
-        'categories': categories
+        'categories': categories,
+        'years': years
     }
 
 
@@ -61,11 +68,13 @@ def main():
 
         # write file
         res = cursor.execute('''SELECT article_url,arquivo_source_url,title,source,year,category,importance,headline,snippet,img_url,
-                                    (SELECT status != 404 FROM urls WHERE url = article_url) AS has_article_url,(SELECT status != 404 FROM urls WHERE url = img_url) AS has_img_url
+                                    (SELECT status NOT IN (404,400,500,0) FROM urls WHERE url = article_url) AS has_article_url,(SELECT status NOT IN (404,400,500,0) FROM urls WHERE url = img_url) AS has_img_url
                                     FROM articles WHERE day = ? AND month = ?''', (day, month)).fetchall()
 
         daily_news = []
         for row in res:
+            has_img_url = row[11]
+
             daily_news.append({
                 'article_url': row[0],
                 'arquivo_source_url': row[1],
@@ -76,9 +85,8 @@ def main():
                 'importance': row[6],
                 'headline': row[7],
                 'snippet': row[8],
-                'img_url': row[9],
-                'has_article_url': row[10],
-                'has_img_url': row[11]
+                'img_url': row[9] if has_img_url else None,
+                'has_article_url': row[10]
             })
 
         # write to file
@@ -90,5 +98,6 @@ def main():
     conn.close()
 
     print('{} {} {} {} {}'.format(min(totals), min(snippet), min(img), min(categories_over_5), min(categories_over_2)))
+
 
 main()
