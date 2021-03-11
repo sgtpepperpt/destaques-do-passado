@@ -1,20 +1,9 @@
 import re
 import uuid
-from enum import Enum
 
-from src.util import prettify_text, clean_special, ignore_title
+from src.util import prettify_text, clean_special, ignore_title, clean_spacing
 
-from src.scrapers.news_scraper import NewsScraper
-
-
-class Importance(str, Enum):
-    FEATURE: str = 6
-    LARGE: str = 5
-    SMALL: str = 4
-    LATEST: str = 3
-    CATEGORY_LARGE: str = 2
-    CATEGORY_SMALL: str = 1
-    RELATED: str = 0
+from src.scrapers.news_scraper import NewsScraper, Importance
 
 
 # Extracts a title from an element containing it. Removes markup such as <b> and <i> tags,
@@ -26,7 +15,11 @@ def extract_title(elem):
     if len(match_hour) > 0:
         text = match_hour[0].strip()
 
-    return re.sub(r' +', ' ', text)
+    # remove a special kind of ellipsis which has a blank space before
+    if text.endswith(' ...'):
+        text = re.sub(r' \.\.\.', '', text)
+
+    return clean_spacing(re.sub(r' +', ' ', text))
 
 
 def process_snippet(snippet):
@@ -134,6 +127,7 @@ class ScraperPublico03(NewsScraper):
 
         if len(destaque) > 1:
             raise Exception('Invalid!!!')
+
         destaque = destaque[0]
         head = destaque.find_previous(class_=v['destaque_head']).find(text=True) or ''
         snippet_elem = destaque.find_next(class_=v['destaque_snippet'])
@@ -410,7 +404,7 @@ class ScraperPublico06(NewsScraper):
                 # ignore "youtube" news
                 continue
 
-            snippet = process_snippet(snippet.find(text=True))
+            snippet = process_snippet(snippet.get_text())
             if not snippet:
                 continue
 

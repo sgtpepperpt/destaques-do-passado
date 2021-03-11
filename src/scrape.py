@@ -80,7 +80,7 @@ def scrape_source(scraper, source, cursor):
         is_https = filename.split('-')[1] == 's'
 
         # TODO dev only
-        # if int(date) < 20121124160209:
+        # if int(date) < 20120305160321:
         #     continue
 
         with open(file) as f:

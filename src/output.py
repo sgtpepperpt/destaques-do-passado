@@ -67,13 +67,28 @@ def main():
         categories_over_2.append(len([c for c in stats['categories'] if stats['categories'][c] > 2]))
 
         # write file
-        res = cursor.execute('''SELECT article_url,arquivo_source_url,title,source,year,category,importance,headline,snippet,img_url,
-                                    (SELECT status NOT IN (404,400,500,0) FROM urls WHERE url = article_url) AS has_article_url,(SELECT status NOT IN (404,400,500,0) FROM urls WHERE url = img_url) AS has_img_url
-                                    FROM articles WHERE day = ? AND month = ?''', (day, month)).fetchall()
+        res = cursor.execute('''SELECT
+                                    COALESCE(article_urls.redirect_url, articles.article_url) AS article_url,
+                                    arquivo_source_url,
+                                    title,
+                                    source,
+                                    year,
+                                    category,
+                                    importance,
+                                    headline,
+                                    snippet,
+                                    COALESCE(img_urls.redirect_url, articles.img_url) AS img_url,
+                                    COALESCE(NULLIF(article_urls.redirect_status, 0), article_urls.status) = 200 AS has_article_url,
+                                    COALESCE(NULLIF(img_urls.redirect_status, 0), img_urls.status) = 200 AS has_img_url
+                                FROM (SELECT * FROM articles WHERE day = ? AND month = ?)  AS articles
+                                INNER JOIN urls AS article_urls ON articles.article_url = article_urls.url
+                                LEFT OUTER JOIN urls AS img_urls on articles.img_url = img_urls.url
+                                ''', (day, month)).fetchall()
 
         daily_news = []
         for row in res:
-            has_img_url = row[11]
+            # some publico images seem like they're there but they're an empty placeholder
+            has_img_url = row[11] and not row[9].endswith('pxTransparente.gif')
 
             daily_news.append({
                 'article_url': row[0],

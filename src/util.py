@@ -6,7 +6,7 @@ def clean_spacing(text):
 
 
 def remove_clutter(text):
-    clutter = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(com vídeo)', '[com vídeo]', 'PORTUGAL:', '(COM TRAILER)']
+    clutter = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)', '(atualizações)', '(com vídeo)', '[com vídeo]', 'PORTUGAL:', '(COM TRAILER)']
     for elem in clutter:
         text = text.replace(elem, '')
 
@@ -60,11 +60,18 @@ def prettify_text(text):
 def ignore_title(title):
     starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
               'Vídeo:', 'Público lança', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
-              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home', 'CR7 exclusivo em', 'http']
+              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home', 'CR7 exclusivo em', 'http',
+              'Mudança na publicação de comentários online']
     for forbidden in starts:
         if title.lower().startswith(forbidden.lower()):
             return True
 
+    contains = ['(exclusivo assinantes)']
+    for forbidden in contains:
+        if forbidden.lower() in title.lower():
+            return True
+
+    # ignore if the title starts with a date/time
     if re.match(r'[0-3][0-9]\.[0-1][0-9]\.[1-2][0-9][0-9][0-9]\s*-\s*.*', title):
         return True
 

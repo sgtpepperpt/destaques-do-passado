@@ -1,6 +1,17 @@
 from collections import defaultdict
+from enum import Enum
 
 from bs4 import BeautifulSoup
+
+
+class Importance(str, Enum):
+    FEATURE: str = 6
+    LARGE: str = 5
+    SMALL: str = 4
+    LATEST: str = 3
+    CATEGORY_LARGE: str = 2
+    CATEGORY_SMALL: str = 1
+    RELATED: str = 0
 
 
 class ScraperCentral:
