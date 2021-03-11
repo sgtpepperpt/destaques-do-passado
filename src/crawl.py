@@ -133,6 +133,7 @@ def get_snapshot_list_cdx(source):
 
 
 def analyse_snapshot_list(snapshots):
+    years = Counter()
     months = Counter()
     first = 2020
     last = 0
@@ -142,9 +143,11 @@ def analyse_snapshot_list(snapshots):
         month = snapshot['tstamp'][4:6]
         year = snapshot['tstamp'][:4]
 
+        years[year] += 1
+
         # get all historic months represented
         # TODO
-        months[year + month] +=1
+        months[year + month] += 1
 
         # get interval extremes
         if int(year) < first:
@@ -155,7 +158,7 @@ def analyse_snapshot_list(snapshots):
     print('\tTotal snapshots {}'.format(len(snapshots)))
     print('\tRange {}-{}'.format(first, last))
 
-    return first, last, months
+    return first, last, months, years
 
 
 def crawl_source(source, download=True):
@@ -212,13 +215,14 @@ def crawl_source(source, download=True):
 
     print('\tTotal downloaded {}'.format(downloads))
     # print('\tTotal reqs ' + str(reqs))
-
     print('\tCoverage {:.2%} ({})'.format(len(days)/366.0, len(days)))
+    print(stats[3].most_common())
 
     return stats, len(snapshots), days
 
 
 def crawl_all(sources):
+    all_years = Counter()
     all_days = Counter()
     first = 2020
     last = 0
@@ -238,6 +242,7 @@ def crawl_all(sources):
             last = stats[1]
 
         total_snapshots += snapshots
+        all_years += stats[3]
         all_months += stats[2]
 
         all_days += days
@@ -246,6 +251,7 @@ def crawl_all(sources):
     print('Total snapshots {}'.format(total_snapshots))
     print('Total range {}-{}'.format(first, last))
     print('Total coverage {:.2%} ({})'.format(len(all_days)/366.0, len(all_days)))
+    print(all_years.most_common())
     print(sorted(all_months))
 
     # for i in range(2000,2013):

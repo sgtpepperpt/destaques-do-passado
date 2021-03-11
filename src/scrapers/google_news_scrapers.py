@@ -1,6 +1,6 @@
 import re
 
-from src.util import prettify_text, is_link_pt, clean_special, ignore_title
+from src.util import prettify_text, is_link_pt, clean_special, ignore_title, remove_clutter
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
@@ -44,7 +44,7 @@ class ScraperGoogleNews01(NewsScraper):
 
             news = {
                 'article_url': url,
-                'title': title,
+                'title': remove_clutter(title),
                 'source': source,
                 'snippet': snippet,
                 'category': category,
@@ -92,7 +92,7 @@ class ScraperGoogleNews02(NewsScraper):
 
             news = {
                 'article_url': url,
-                'title': title,
+                'title': remove_clutter(title),
                 'source': source,
                 'snippet': prettify_text(snippet),
                 'category': category,
@@ -130,7 +130,7 @@ class ScraperGoogleNews03(NewsScraper):
 
             news = {
                 'article_url': url,
-                'title': title,
+                'title': remove_clutter(title),
                 'source': source,
                 'snippet': prettify_text(snippet),
                 'category': category,

@@ -1,7 +1,7 @@
 import re
 import uuid
 
-from src.util import prettify_text, clean_special, ignore_title, clean_spacing
+from src.util import prettify_text, clean_special, ignore_title, remove_clutter
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
@@ -19,7 +19,7 @@ def extract_title(elem):
     if text.endswith(' ...'):
         text = re.sub(r' \.\.\.', '', text)
 
-    return clean_spacing(re.sub(r' +', ' ', text))
+    return remove_clutter(re.sub(r' +', ' ', text))
 
 
 def process_snippet(snippet):
