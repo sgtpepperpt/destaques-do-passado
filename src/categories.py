@@ -18,6 +18,7 @@ class Category(Enum):
     LOCAL = 'Local'
     ENVIRONMENT = 'Ambiente'
     OPINION = 'Opinião'
+    UNUSUAL = 'Insólito'
 
 
 category_bindings = {
@@ -26,7 +27,7 @@ category_bindings = {
     ('Mundo', 'Internacional'): Category.WORLD,
     ('Desporto', 'Esportes'): Category.SPORTS,
     ('Negócios', 'Economia'): Category.BUSINESS,
-    ('Entretenimento',): Category.ENTERTAINMENT,
+    ('Entretenimento', 'Música', 'Cinema'): Category.ENTERTAINMENT,
     ('Ciência', 'Ciências'): Category.SCIENCE,
     ('Saúde',): Category.HEALTH,
     ('Política',): Category.POLITICS,
@@ -36,7 +37,8 @@ category_bindings = {
     ('Sociedade',): Category.SOCIETY,
     ('Local',): Category.LOCAL,
     ('Ambiente', 'Ecosfera'): Category.ENVIRONMENT,
-    ('Opinião',): Category.OPINION
+    ('Opinião',): Category.OPINION,
+    ('Acredite se quiser', 'Esta é boca'): Category.UNUSUAL
 }
 
 

@@ -6,6 +6,8 @@ import chardet
 import requests
 import pathlib
 
+from bs4 import BeautifulSoup
+
 from src.util import is_https_link
 
 news_sources = [
@@ -16,7 +18,7 @@ news_sources = [
     {'site': 'diariodigital.pt'},
     {'site': 'iol.pt'},
     {'site': 'aeiou.pt'},
-    {'site': 'portugaldiario.iol.pt'},
+    {'site': 'portugaldiario.iol.pt', 'ignore': ['20001119134000', '20001202055200', '20010202072300', '20050325075505', '20050828053247'], 'to': '20100626141610'},  # becomes a redirect to tvi24 after
     {'site': 'sicnoticias.sapo.pt'},
     {'site': 'rtp.pt'},
     {'site': 'dn.pt'},
@@ -62,42 +64,42 @@ news_sources = [
 ]
 
 
-def get_snapshot_list_api(source):
-    params = {
-        'versionHistory': source['site'],
-        'to': source.get('to') or '20131231235959',
-        'maxItems': 200
-    }
-
-    if 'from' in source:
-        params['from'] = source['from']
-
-    r = requests.get('https://arquivo.pt/textsearch', params)
-    data = r.json()
-
-    if 'response_items' not in data or len(data['response_items']) == 0:
-        print('\tNo results')
-        return
-
-    dates = set()
-    snapshots = []
-    while 'response_items' in data and len(data['response_items']) > 0:
-        for item in data['response_items']:
-            # if this day in history was already crawled continue (1 snapshot per day only)
-            if item['tstamp'][:8] in dates:
-                continue
-            dates.add(item['tstamp'][:8])
-
-            snapshots.append({
-                'tstamp': item['tstamp'],
-                'linkToArchive': item['linkToArchive'],
-                'linkToNoFrame': item['linkToNoFrame'],
-                'linkToScreenshot': item['linkToScreenshot']
-            })
-
-        data = requests.get(data['next_page']).json()
-
-    return snapshots
+# def get_snapshot_list_api(source):
+#     params = {
+#         'versionHistory': source['site'],
+#         'to': source.get('to') or '20131231235959',
+#         'maxItems': 200
+#     }
+#
+#     if 'from' in source:
+#         params['from'] = source['from']
+#
+#     r = requests.get('https://arquivo.pt/textsearch', params)
+#     data = r.json()
+#
+#     if 'response_items' not in data or len(data['response_items']) == 0:
+#         print('\tNo results')
+#         return
+#
+#     dates = set()
+#     snapshots = []
+#     while 'response_items' in data and len(data['response_items']) > 0:
+#         for item in data['response_items']:
+#             # if this day in history was already crawled continue (1 snapshot per day only)
+#             if item['tstamp'][:8] in dates:
+#                 continue
+#             dates.add(item['tstamp'][:8])
+#
+#             snapshots.append({
+#                 'tstamp': item['tstamp'],
+#                 'linkToArchive': item['linkToArchive'],
+#                 'linkToNoFrame': item['linkToNoFrame'],
+#                 'linkToScreenshot': item['linkToScreenshot']
+#             })
+#
+#         data = requests.get(data['next_page']).json()
+#
+#     return snapshots
 
 
 def get_snapshot_list_cdx(source):
@@ -121,6 +123,10 @@ def get_snapshot_list_cdx(source):
         # if this day in history was already crawled continue (1 snapshot per day only)
         if line['timestamp'][:8] in dates:
             continue
+
+        if 'ignore' in source and line['timestamp'] in source['ignore']:
+            continue
+
         dates.add(line['timestamp'][:8])
 
         snapshots.append({
@@ -159,6 +165,28 @@ def analyse_snapshot_list(snapshots):
     print('\tRange {}-{}'.format(first, last))
 
     return first, last, months, years
+
+
+def get_page_content(url):
+    r = requests.get(url)
+    encoding = chardet.detect(r.content)['encoding'] or 'utf-8'
+    return r.content.decode(encoding, errors='replace')
+
+
+def get_page(url):
+    # follow meta refresh tags if existent
+
+    element = True
+    while element and url:
+        content = get_page_content(url)
+        soup = BeautifulSoup(content, features='html5lib')
+        element = soup.find('meta', attrs={'http-equiv': 'refresh'})
+        if element and 'content' in element and '=' in element['content']:
+            url = element['content'].partition('=')[2]
+        else:
+            element = None
+
+    return content
 
 
 def crawl_source(source, download=True):
@@ -208,10 +236,10 @@ def crawl_source(source, download=True):
                 if snapshot['tstamp'] in special_requests:  # use this if for some reason need to request a different link for a day
                     page_link += special_requests[snapshot['tstamp']]
 
-                r = requests.get(page_link)
-                encoding = chardet.detect(r.content)['encoding'] or 'utf-8'
+                # get page content
+                content = get_page(page_link)
                 with open(page, 'w') as f:
-                    f.write(r.content.decode(encoding, errors='replace'))
+                    f.write(content)
 
     print('\tTotal downloaded {}'.format(downloads))
     # print('\tTotal reqs ' + str(reqs))

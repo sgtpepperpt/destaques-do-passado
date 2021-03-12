@@ -7,6 +7,8 @@ import requests
 from src.categories import bind_category
 from src.scrapers.google_news_scrapers import *
 from src.scrapers.news_scraper import ScraperCentral
+from src.scrapers.portugaldiario_scrapers import ScraperPortugalDiario01, ScraperPortugalDiario02, \
+    ScraperPortugalDiario03, ScraperPortugalDiario04, ScraperPortugalDiario05, ScraperPortugalDiario06
 from src.scrapers.publico_scrapers import ScraperPublico01, ScraperPublico02, ScraperPublico03, ScraperPublico04, \
     ScraperPublico05, ScraperPublico06, ScraperPublico07
 from src.sources import bind_source, source_name_from_file
@@ -72,7 +74,7 @@ def create_database(cursor):
     cursor.connection.commit()
 
 
-def scrape_source(scraper, source, cursor):
+def scrape_source(scraper, source, cursor, db_insert=True):
     for file in sorted([p for p in pathlib.Path(os.path.join('crawled', source, 'pages')).iterdir() if p.is_file()]):
         print(file.name)
         filename = file.name.split('.')[0]
@@ -80,7 +82,7 @@ def scrape_source(scraper, source, cursor):
         is_https = filename.split('-')[1] == 's'
 
         # TODO dev only
-        # if int(date) < 20120305160321:
+        # if int(date) < 20081022011222:
         #     continue
 
         with open(file) as f:
@@ -115,17 +117,18 @@ def scrape_source(scraper, source, cursor):
             print(n)
 
             # add article to DB
-            cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (n['article_url'],))
+            if db_insert:
+                cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (n['article_url'],))
 
-            if 'img_url' in n and n['img_url']:
-                n['img_url'] = make_absolute(source, date, is_https, n['img_url'])
-                cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (n.get('img_url'),))
+                if 'img_url' in n and n['img_url']:
+                    n['img_url'] = make_absolute(source, date, is_https, n['img_url'])
+                    cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (n.get('img_url'),))
 
-            # ignores already-inserted news (article url is unique for each article)
-            # assumes sequencial insertion to preserver only earliest occurence of the article
-            cursor.execute('''INSERT OR IGNORE INTO articles(original_article_url, article_url,arquivo_source_url,title,source,day,month,year,category,importance,headline,snippet,img_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-                           (original_article_url, n['article_url'], arquivo_source_url, n['title'], article_source, date[6:8], date[4:6], date[:4], category, n.get('importance'), n.get('headline'), n.get('snippet'), n.get('img_url')))
-            cursor.connection.commit()
+                # ignores already-inserted news (article url is unique for each article)
+                # assumes sequencial insertion to preserver only earliest occurence of the article
+                cursor.execute('''INSERT OR IGNORE INTO articles(original_article_url, article_url,arquivo_source_url,title,source,day,month,year,category,importance,headline,snippet,img_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''',
+                               (original_article_url, n['article_url'], arquivo_source_url, n['title'], article_source, date[6:8], date[4:6], date[:4], category, n.get('importance'), n.get('headline'), n.get('snippet'), n.get('img_url')))
+                cursor.connection.commit()
 
 
 def main():
@@ -145,10 +148,17 @@ def main():
     scraper.register_scraper(ScraperPublico05)
     scraper.register_scraper(ScraperPublico06)
     scraper.register_scraper(ScraperPublico07)
+    scraper.register_scraper(ScraperPortugalDiario01)
+    scraper.register_scraper(ScraperPortugalDiario02)
+    scraper.register_scraper(ScraperPortugalDiario03)
+    scraper.register_scraper(ScraperPortugalDiario04)
+    scraper.register_scraper(ScraperPortugalDiario05)
+    scraper.register_scraper(ScraperPortugalDiario06)
 
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
     scrape_source(scraper, 'publico.pt', cursor)
+    scrape_source(scraper, 'portugaldiario.iol.pt', cursor)
 
     # process urls
     check_urls(cursor)

@@ -6,7 +6,10 @@ def clean_spacing(text):
 
 
 def remove_clutter(text):
-    clutter = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)', '(atualizações)', '(com vídeo)', '[com vídeo]', 'PORTUGAL:', '(COM TRAILER)']
+    if not text:
+        return
+
+    clutter = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)', '(atualizações)', '(com vídeo)', '[com vídeo]', 'PORTUGAL:', '(COM TRAILER)', 'EXCLUSIVO:', '(galeria de fotos)']
     for elem in clutter:
         text = text.replace(elem, '')
 
@@ -18,6 +21,9 @@ def clean_special(text):
 
 
 def prettify_text(text):
+    if not text:
+        return text
+
     had_ellipsis = False
     had_period = False
 
@@ -61,7 +67,7 @@ def ignore_title(title):
     starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
               'Vídeo:', 'Público lança', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
               'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home', 'CR7 exclusivo em', 'http',
-              'Mudança na publicação de comentários online']
+              'Mudança na publicação de comentários online', 'Quiosque:', 'Comente', 'Euromilhões', 'Vote']
     for forbidden in starts:
         if title.lower().startswith(forbidden.lower()):
             return True

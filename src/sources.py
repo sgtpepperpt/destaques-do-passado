@@ -15,6 +15,7 @@ def source_name_from_file(source):
     sources = {
         'publico.pt': 'Público',
         'ultimahorapublico.pt': 'Público',
+        'portugaldiario.iol.pt': 'Portugal Diário',
     }
 
     return sources[source]
