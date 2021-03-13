@@ -22,22 +22,11 @@ def check_urls(cursor):
         # noFrame gives us the actual status code
         no_frame_url = url.replace('arquivo.pt/wayback', 'arquivo.pt/noFrame/replay')
 
-        r = requests.head(no_frame_url)
-        cursor.execute('UPDATE urls SET status = ? WHERE url = ?', (r.status_code, url))
-        cursor.connection.commit()
-
-
-def check_redirects(cursor):
-    urls = cursor.execute('''SELECT url FROM urls WHERE status LIKE \'3%\' AND redirect_status = 0''').fetchall()
-
-    for url in [url[0] for url in urls]:
-        # noFrame gives us the actual status code
-        no_frame_url = url.replace('arquivo.pt/wayback', 'arquivo.pt/noFrame/replay')
-
         try:
             r = requests.head(no_frame_url, allow_redirects=True)
 
-            cursor.execute('UPDATE urls SET redirect_url = ?, redirect_status = ? WHERE url = ?', (r.url, r.status_code, url))
+            cursor.execute('UPDATE urls SET status = ?, redirect_url = ? WHERE url = ?',
+                           (r.status_code, r.url, url))
             cursor.connection.commit()
         except Exception as e:
             print(e)
@@ -49,8 +38,7 @@ def create_database(cursor):
     cursor.execute('''CREATE TABLE IF NOT EXISTS urls (
                     url             TEXT    PRIMARY KEY NOT NULL,
                     status          INT     DEFAULT 0,
-                    redirect_url    TEXT,
-                    redirect_status INT     DEFAULT 0
+                    redirect_url    TEXT
                 )''')
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS articles (
@@ -160,9 +148,8 @@ def main():
     scrape_source(scraper, 'publico.pt', cursor)
     scrape_source(scraper, 'portugaldiario.iol.pt', cursor)
 
-    # process urls
+    # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)
-    check_redirects(cursor)
 
     conn.commit()
     conn.close()

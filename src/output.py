@@ -78,10 +78,10 @@ def main():
                                     headline,
                                     snippet,
                                     COALESCE(img_urls.redirect_url, articles.img_url) AS img_url,
-                                    COALESCE(NULLIF(article_urls.redirect_status, 0), article_urls.status) = 200 AS has_article_url,
-                                    COALESCE(NULLIF(img_urls.redirect_status, 0), img_urls.status) = 200 AS has_img_url
+                                    article_urls.status = 200 AS has_article_url,
+                                    img_urls.status = 200 AS has_img_url
                                 FROM (SELECT * FROM articles WHERE day = ? AND month = ?)  AS articles
-                                INNER JOIN urls AS article_urls ON articles.article_url = article_urls.url
+                                LEFT OUTER JOIN urls AS article_urls ON articles.article_url = article_urls.url
                                 LEFT OUTER JOIN urls AS img_urls on articles.img_url = img_urls.url
                                 ''', (day, month)).fetchall()
 
