@@ -1,6 +1,6 @@
 import re
 
-from src.util import prettify_text, is_link_pt, clean_special, ignore_title, remove_clutter
+from src.util import prettify_text, ignore_title, remove_clutter
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
@@ -131,6 +131,7 @@ def check_url(url):
         return url[1:]
     return url
 
+
 def process_categories(all_news, all_lines):
     category = None
     for line in all_lines:
@@ -148,7 +149,7 @@ def process_categories(all_news, all_lines):
             'article_url': check_url(elem.get('href')),
             'title': remove_clutter(title),
             'category': category,
-            'importance': Importance.CATEGORY_SMALL
+            'importance': Importance.SMALL
         })
 
 
@@ -330,7 +331,7 @@ class ScraperPortugalDiario05(NewsScraper):
                         'article_url': article.get('href'),
                         'title': remove_clutter(article.get_text()),
                         'category': category,
-                        'importance': Importance.CATEGORY_SMALL
+                        'importance': Importance.SMALL
                     })
 
         return all_news
@@ -425,7 +426,7 @@ class ScraperPortugalDiario06(NewsScraper):
             img_elem = url_elem.find('img')
             img_url = img_elem.get('src') if img_elem else None
 
-            importance = Importance.CATEGORY_LARGE if 'first' in (article.get('class') or []) else Importance.CATEGORY_SMALL
+            importance = Importance.LARGE if 'first' in (article.get('class') or []) else Importance.SMALL
             all_news.append({
                 'article_url': url_elem.get('href'),
                 'title': remove_clutter(title_elem.get_text()),

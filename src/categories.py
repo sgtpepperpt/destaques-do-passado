@@ -22,7 +22,7 @@ class Category(Enum):
 
 
 category_bindings = {
-    ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias', 'Destaque', 'Última hora', 'Outras'): Category.GENERIC,
+    ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias', 'Destaque', 'Última hora', 'Outras', '1ª Página'): Category.GENERIC,
     ('Portugal', ): Category.NATIONAL,
     ('Mundo', 'Internacional'): Category.WORLD,
     ('Desporto', 'Esportes'): Category.SPORTS,
@@ -31,11 +31,11 @@ category_bindings = {
     ('Ciência', 'Ciências'): Category.SCIENCE,
     ('Saúde',): Category.HEALTH,
     ('Política',): Category.POLITICS,
-    ('Cultura',): Category.CULTURE,
+    ('Cultura', 'Leituras'): Category.CULTURE,
     ('Educação',): Category.EDUCATION,
     ('Tecnologia', 'Ciência/tecnologia'): Category.TECHNOLOGY,
     ('Sociedade',): Category.SOCIETY,
-    ('Local',): Category.LOCAL,
+    ('Local', 'Local Lisboa'): Category.LOCAL,
     ('Ambiente', 'Ecosfera'): Category.ENVIRONMENT,
     ('Opinião',): Category.OPINION,
     ('Acredite se quiser', 'Esta é boca'): Category.UNUSUAL

@@ -1,6 +1,6 @@
 import re
 
-from src.util import prettify_text, is_link_pt, clean_special, ignore_title, remove_clutter
+from src.util import prettify_text, is_link_pt, clean_special_chars, ignore_title, remove_clutter
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
@@ -29,14 +29,14 @@ class ScraperGoogleNews01(NewsScraper):
                 continue
 
             # find news category from parent table
-            category = clean_special(str(link.find_previous(class_='ks').next))
+            category = clean_special_chars(str(link.find_previous(class_='ks').next))
 
             # find source name
             source_elem = link.find_next('font', color='#6f6f6f')
             if source_elem.find('b'):
-                source = clean_special(source_elem.find('b').get_text())
+                source = clean_special_chars(source_elem.find('b').get_text())
             else:
-                source = clean_special(source_elem.get_text())
+                source = clean_special_chars(source_elem.get_text())
 
             snippet_elem = link.next_sibling.next_sibling.next_sibling.next_sibling
             if snippet_elem.name == 'font':
@@ -85,7 +85,7 @@ class ScraperGoogleNews02(NewsScraper):
                 else:
                     header = try_header_v2.find('span', class_='title').get_text()
 
-            category = clean_special(str(header))
+            category = clean_special_chars(str(header))
 
             source = story.find_next('span', class_='source').get_text()
             snippet = story.find_next('div', class_='snippet').get_text()
@@ -123,7 +123,7 @@ class ScraperGoogleNews03(NewsScraper):
 
             # find news category from parent table
             header = story.find_previous('span', class_='section-name').get_text()
-            category = clean_special(str(header))
+            category = clean_special_chars(str(header))
 
             source = (story.find_next('span', class_='esc-lead-article-source') or story.find_next('span', class_='al-attribution-source')).get_text()  # handle two different versions
             snippet = story.find_next('div', class_='esc-lead-snippet-wrapper').get_text()

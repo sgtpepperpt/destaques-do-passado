@@ -5,12 +5,10 @@ from bs4 import BeautifulSoup
 
 
 class Importance(str, Enum):
-    FEATURE: str = 6
-    LARGE: str = 5
-    SMALL: str = 4
-    LATEST: str = 3
-    CATEGORY_LARGE: str = 2
-    CATEGORY_SMALL: str = 1
+    FEATURE: str = 4
+    LARGE: str = 3
+    SMALL: str = 2
+    LATEST: str = 1
     RELATED: str = 0
 
 

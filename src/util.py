@@ -1,3 +1,4 @@
+import hashlib
 import re
 
 
@@ -16,7 +17,8 @@ def remove_clutter(text):
     return clean_spacing(text)
 
 
-def clean_special(text):
+def clean_special_chars(text):
+    # removes clutter and also special chars from the text
     return re.sub(r'[\W|»|”|"|’]+$', '', remove_clutter(text))
 
 
@@ -98,7 +100,7 @@ def get_original_news_url(url):
     if url.startswith('no-article-url'):
         return url
 
-    groups = re.search(r'https://arquivo\.pt/noFrame/replay/[0-9]*/(.*)', url)
+    groups = re.search(r'https://arquivo\.pt/(?:noFrame/replay|wayback)/[0-9]*(?:oe_)?/(.*)', url)
     return groups.group(1)
 
 
@@ -111,14 +113,14 @@ def split_date(date):
     return date[:4], date[4:6], date[6:8]
 
 
-def make_absolute(source, date, is_https, url):
+def make_absolute(source, timestamp, is_https, url):
     if str(url).startswith('no-article-url'):
         return url
 
     if not url or len(url) == 0:
         raise Exception('URL not provided')
 
-    possible = r'(https://arquivo\.pt)?(/)?(noFrame/replay)?(/)?([0-9]*)?(?:im_)?(/)?(https?://[^/]*)?(/)?(.*)?'
+    possible = r'(https://arquivo\.pt)?(/)?(noFrame/replay|wayback)?(/)?([0-9]*)?(?:im_|oe_)?(/)?(https?://[^/]*)?(/)?(.*)?'
     match = re.findall(possible, url)
 
     final = ''
@@ -135,7 +137,7 @@ def make_absolute(source, date, is_https, url):
         final += '/'
 
     if not match[0][4]:
-        final += date
+        final += timestamp
 
     if not match[0][5]:
         final += '/'
@@ -150,3 +152,8 @@ def make_absolute(source, date, is_https, url):
         raise Exception('Error in absolute url')
 
     return final + url
+
+
+def generate_dummy_url(source, timestamp, category, title):
+    st = '{}-{}-{}-{}'.format(source, timestamp, category, title)
+    return 'no-article-url-' + hashlib.sha224(st.encode()).hexdigest()

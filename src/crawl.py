@@ -12,7 +12,7 @@ from src.util import is_https_link
 
 news_sources = [
     {'site': 'news.google.pt', 'from': '20051124000000'},
-    {'site': 'publico.pt', 'special': {'20100910150634': '?fl=1', '20110703150815': '?mobile=no'}},
+    {'site': 'publico.pt', 'special': {'20100910150634': '?fl=1', '20110703150815': '?mobile=no'}, 'ignore': ['19961013180344', '19990421171920-20001203173200']},
     {'site': 'ultimahora.publico.pt'},
     {'site': 'sabado.pt'},
     {'site': 'diariodigital.pt'},
@@ -101,6 +101,20 @@ news_sources = [
 #
 #     return snapshots
 
+def is_ignored(source, timestamp):
+    if 'ignore' not in source:
+        return False
+
+    if timestamp in source['ignore']:
+        return True
+
+    ignore_intervals = [ignore for ignore in source['ignore'] if '-' in ignore]
+    for min, max in [interval.split('-') for interval in ignore_intervals]:
+        if min <= timestamp <= max:
+            return True
+
+    return False
+
 
 def get_snapshot_list_cdx(source):
     params = {
@@ -124,7 +138,7 @@ def get_snapshot_list_cdx(source):
         if line['timestamp'][:8] in dates:
             continue
 
-        if 'ignore' in source and line['timestamp'] in source['ignore']:
+        if is_ignored(source, line['timestamp']):
             continue
 
         dates.add(line['timestamp'][:8])
