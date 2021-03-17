@@ -368,7 +368,7 @@ class ScraperPublico05(NewsScraper):
         # destaque
         destaques = soup.find_all(id='caixasNoticias')
         for destaque in destaques:
-            head = destaque.find(text=True)
+            head = destaque.find(text=True, recursive=False)
             title = destaque.find(class_='manchete').find('a')
             snippet = process_snippet(destaque.find(class_='textoNews').find(text=True))
 
