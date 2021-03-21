@@ -10,7 +10,7 @@ def remove_clutter(text):
     if not text:
         return
 
-    clutter = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)', '(atualizações)', '(com vídeo)', '[com vídeo]', 'PORTUGAL:', '(COM TRAILER)', 'EXCLUSIVO:', '(galeria de fotos)']
+    clutter = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)', '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', 'PORTUGAL:', '(COM TRAILER)', 'EXCLUSIVO:', '(galeria de fotos)']
     for elem in clutter:
         text = text.replace(elem, '')
 
@@ -74,7 +74,7 @@ def ignore_title(title):
         if title.lower().startswith(forbidden.lower()):
             return True
 
-    contains = ['(exclusivo assinantes)']
+    contains = ['(exclusivo assinantes)', 'Veja o vídeo']
     for forbidden in contains:
         if forbidden.lower() in title.lower():
             return True

@@ -3,7 +3,23 @@ import sqlite3
 
 
 def count_category(cursor, day, month, category):
-    return cursor.execute('SELECT COUNT(*) FROM articles WHERE day = ? AND month = ? AND category = ?', (day, month, category)).fetchall()[0][0]
+    res = cursor.execute('''
+            WITH stats AS (
+                SELECT * FROM articles
+                LEFT OUTER JOIN urls AS img_urls on articles.img_url = img_urls.url
+                WHERE day = ? AND month = ? AND category = ?
+            )
+            SELECT
+                (SELECT COUNT(*) FROM stats) AS total,
+                (SELECT COUNT(*) FROM stats WHERE snippet IS NOT NULL OR stats.status = 200) AS large,
+                (SELECT COUNT(*) FROM stats WHERE snippet IS NULL AND (stats.status != 200 OR stats.status IS NULL)) AS small
+        ''', (day, month, category)).fetchall()[0]
+
+    return {
+        'total': res[0],
+        'large': res[1],
+        'small': res[2]
+    }
 
 
 def get_day_stats(cursor, day, month):
@@ -31,7 +47,7 @@ def get_day_stats(cursor, day, month):
     }
 
     # only show categories with articles
-    categories = {k: v for (k, v) in categories.items() if v > 0}
+    categories = {k: v for (k, v) in categories.items() if v['total'] > 0}
 
     years = cursor.execute('SELECT DISTINCT year FROM articles WHERE day = ? AND month = ?', (day, month)).fetchall()
     years = [year[0] for year in years]
@@ -53,8 +69,9 @@ def main():
     totals = []
     snippet = []
     img = []
-    categories_over_5 = []
-    categories_over_2 = []
+    categories_over_3 = []
+    large_cats = []
+    small_cats = []
 
     for day, month in days:
         print('{:02}/{:02}'.format(day, month))
@@ -63,8 +80,9 @@ def main():
         totals.append(stats['total'])
         snippet.append(stats['snippets'])
         img.append(stats['imgs'])
-        categories_over_5.append(len([c for c in stats['categories'] if stats['categories'][c] > 5]))
-        categories_over_2.append(len([c for c in stats['categories'] if stats['categories'][c] > 2]))
+        categories_over_3.append(len([c for c in stats['categories'] if stats['categories'][c]['total'] > 3]))
+        large_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['large'] > 0 and stats['categories'][c]['total'] >= 3]))
+        small_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['total'] >= 3]))
 
         # write file
         res = cursor.execute('''SELECT
@@ -112,7 +130,7 @@ def main():
             }))
     conn.close()
 
-    print('{} {} {} {} {}'.format(min(totals), min(snippet), min(img), min(categories_over_5), min(categories_over_2)))
+    print('{} {} {} {} {} {}'.format(min(totals), min(snippet), min(img), min(categories_over_3), min(large_cats), min(small_cats)))
 
 
 main()

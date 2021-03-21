@@ -264,7 +264,7 @@ class ScraperPortugalDiario05(NewsScraper):
         # featured
         featured_elem = soup.find('div', id='manchete')
         featured_url_elem = featured_elem.find('h1').find('a')
-        featured_img_elem = featured_elem.find('div', id='img').find('img')
+        featured_img_elem = featured_elem.find('div', id='img').find('a', class_='lrec').find('img')
 
         featured_snippet = featured_elem.find('span', class_='res').get_text()
 
