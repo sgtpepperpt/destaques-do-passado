@@ -69,12 +69,15 @@ def create_database(cursor):
 def scrape_source(scraper, source, cursor, db_insert=True):
     for file in sorted([p for p in pathlib.Path(os.path.join('crawled', source, 'pages')).iterdir() if p.is_file()]):
         print(file.name)
-        filename = file.name.split('.')[0]
-        date = filename.split('-')[0]
-        is_https = filename.split('-')[1] == 's'
+        filename = file.name.replace('.html', '')
+
+        elems = filename.split('-')
+        date = elems[0]
+        is_https = elems[1] == 's'
+        actual_url = elems[2].replace('*', ':') if len(elems) > 2 else None
 
         # TODO dev only
-        # if int(date) < 20110119160209:
+        # if int(date) < 20020327105712:
         #     continue
 
         with open(file) as f:
@@ -87,12 +90,14 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         if len(news) < 3:  # useful to detect when a parser stops working
             raise Exception('So few news here!')
 
+        source_url = actual_url or source
+
         for n in news:
             # timestamp can be provided in news if using dummy parser, else get it from filename
             timestamp = str(n.get('timestamp') or date)
 
             # parse the url to the original article, a lot of times it's relative to the original website's root
-            article_url = make_absolute(source, timestamp, is_https, n['article_url'])
+            article_url = make_absolute(source_url, timestamp, is_https, n['article_url'])
 
             # source is only present for news aggregators, so if not present deduce it from filename
             article_source = bind_source(n.get('source') or source_name_from_file(source))
@@ -102,7 +107,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
 
             # add the link to where we got the article from (our source of knowledge)
             # sometimes the source url might be defined by hand (eg when the article is not in the crawled archives, or not on the newpaper's main page)
-            arquivo_source_url = n.get('arquivo_source_url') or 'https://arquivo.pt/wayback/{}/http{}://{}/'.format(timestamp, 's' if is_https else '', source)
+            arquivo_source_url = n.get('arquivo_source_url') or 'https://arquivo.pt/wayback/{}/http{}://{}/'.format(timestamp, 's' if is_https else '', source_url)
 
             # the original link to the article should be unique for each one, thus indicating its uniqueness
             # (article_url does not work, as two different snapshots would have different links pointing to the same)
@@ -123,7 +128,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
 
             img_url = None
             if n.get('img_url'):
-                img_url = make_absolute(source, timestamp, is_https, n['img_url'])
+                img_url = make_absolute(source_url, timestamp, is_https, n['img_url'])
                 cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (img_url,))
 
             # ignores already-inserted news (article url is unique for each article)

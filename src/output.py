@@ -73,6 +73,7 @@ def main():
     img = []
     categories_over_3 = []
     large_cats = []
+    medium_cats = []
     small_cats = []
 
     for day, month in days:
@@ -83,8 +84,9 @@ def main():
         snippet.append(stats['snippets'])
         img.append(stats['imgs'])
         categories_over_3.append(len([c for c in stats['categories'] if stats['categories'][c]['total'] > 3]))
-        large_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['large'] > 0 and stats['categories'][c]['total'] >= 3]))
-        small_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['total'] >= 3]))
+        large_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['large'] >= 2 and stats['categories'][c]['total'] >= 6]))
+        medium_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['large'] >= 1 and stats['categories'][c]['total'] >= 3]))
+        small_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['total'] >= 4]))
 
         # write file
         res = cursor.execute('''SELECT
@@ -121,7 +123,7 @@ def main():
                 'importance': row[6],
                 'headline': row[7],
                 'snippet': row[8],
-                'img_url': remove_destaques_uniqueness(row[9]) if has_img_url else None,
+                'img_url': row[9] if has_img_url else None,
                 'has_article_url': row[10]
             })
 
@@ -133,7 +135,7 @@ def main():
             }))
     conn.close()
 
-    print('{} {} {} {} {} {}'.format(min(totals), min(snippet), min(img), min(categories_over_3), min(large_cats), min(small_cats)))
+    print('{} {} {} {} / {} {} {}'.format(min(totals), min(snippet), min(img), min(categories_over_3), min(large_cats), min(medium_cats), min(small_cats)))
 
 
 main()

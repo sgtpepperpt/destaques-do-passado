@@ -154,6 +154,12 @@ def make_absolute(source, timestamp, is_https, url):
     return final + url
 
 
+def get_actual_source(url):
+    possible = r'(https://arquivo\.pt)?(/)?(noFrame/replay|wayback)?(/)?([0-9]{14})?(?:im_|oe_|mp_)?(/)?(https?)://([^/]*)?(/)?(.*)?'
+    match = re.findall(possible, url)
+    return match[0][7]
+
+
 def generate_dummy_url(source, timestamp, category, title):
     st = '{}-{}-{}-{}'.format(source, timestamp, category, title)
     return 'no-article-url-' + hashlib.sha224(st.encode()).hexdigest()

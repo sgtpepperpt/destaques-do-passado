@@ -8,7 +8,7 @@ import pathlib
 
 from bs4 import BeautifulSoup
 
-from src.util import is_https_link
+from src.util import is_https_link, get_actual_source
 
 # pages can be ignored via timestamp or range of timestamps, eg if page didn't change in consecutive days or there was a page error
 # encoding can be defined like timestamps
@@ -213,13 +213,16 @@ def analyse_snapshot_list(snapshots):
 def get_page_content(url, encoding):
     r = requests.get(url)
     encoding = encoding or chardet.detect(r.content)['encoding'] or 'utf-8'
-    return r.content.decode(encoding, errors='replace')
+
+    actual_url_redirect = get_actual_source(r.url)  # source isn't always the same as expected, see 'jn.pt' vs 'jn.sapo.pt'
+
+    return r.content.decode(encoding, errors='replace'), actual_url_redirect.replace(':', '*')
 
 
 def get_page(url, encoding):
     element = True
     while element and url:
-        content = get_page_content(url, encoding)
+        content, actual_url = get_page_content(url, encoding)
         soup = BeautifulSoup(content, features='html5lib')
 
         # follows meta refresh tags if existent
@@ -229,7 +232,7 @@ def get_page(url, encoding):
         else:
             element = None
 
-    return content
+    return content, actual_url
 
 
 def crawl_source(source, download=True):
@@ -274,13 +277,19 @@ def crawl_source(source, download=True):
                     f.write(r.content)
 
             page = os.path.join(page_dir, snapshot['tstamp'] + https + '.html')
-            if not os.path.exists(page):
+            if not os.path.exists(page):  # by adding the source url to the filename this becomes unnecessary, since we can't predict the filename before making the request
                 page_link = snapshot['linkToNoFrame']
                 if snapshot['tstamp'] in special_requests:  # use this if for some reason need to request a different link for a day
                     page_link += special_requests[snapshot['tstamp']]
 
                 # get page content
-                content = get_page(page_link, get_encoding(source, snapshot['tstamp']))
+                encoding = get_encoding(source, snapshot['tstamp'])
+                content, actual_url = get_page(page_link, encoding)
+
+                # get the actual url
+                if actual_url:
+                    page = os.path.join(page_dir, snapshot['tstamp'] + https + '-' + actual_url + '.html')
+
                 with open(page, 'w') as f:
                     f.write(content)
 
