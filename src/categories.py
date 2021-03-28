@@ -22,23 +22,23 @@ class Category(Enum):
 
 
 category_bindings = {
-    ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias', 'Destaque', 'Última hora', 'Outras', '1ª Página'): Category.GENERIC,
-    ('Portugal', ): Category.NATIONAL,
+    ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias', 'Destaque', 'Última hora', 'Outras', '1ª Página', 'Em foco', 'Foco', 'Última', 'Útimas notícias', 'Últimas'): Category.GENERIC,
+    ('Portugal', 'País'): Category.NATIONAL,
     ('Mundo', 'Internacional'): Category.WORLD,
     ('Desporto', 'Esportes'): Category.SPORTS,
     ('Negócios', 'Economia'): Category.BUSINESS,
-    ('Entretenimento', 'Música', 'Cinema'): Category.ENTERTAINMENT,
+    ('Entretenimento', 'Música', 'Cinema', 'Palco', 'Televisão'): Category.ENTERTAINMENT,
     ('Ciência', 'Ciências'): Category.SCIENCE,
     ('Saúde',): Category.HEALTH,
     ('Política',): Category.POLITICS,
     ('Cultura', 'Leituras'): Category.CULTURE,
     ('Educação',): Category.EDUCATION,
     ('Tecnologia', 'Ciência/tecnologia'): Category.TECHNOLOGY,
-    ('Sociedade',): Category.SOCIETY,
-    ('Local', 'Local Lisboa'): Category.LOCAL,
+    ('Sociedade', 'Grande Plano', 'Tema da semana', 'Polícia', 'Gente'): Category.SOCIETY,
+    ('Local', 'Local Lisboa', 'Grande Porto', 'Grande Lisboa', 'Grande Lsiboa', 'Porto 2001'): Category.LOCAL,
     ('Ambiente', 'Ecosfera'): Category.ENVIRONMENT,
     ('Opinião',): Category.OPINION,
-    ('Acredite se quiser', 'Esta é boca'): Category.UNUSUAL
+    ('Acredite se quiser', 'Esta é boca', 'Mundo Insólito'): Category.UNUSUAL
 }
 
 

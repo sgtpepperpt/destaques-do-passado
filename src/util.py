@@ -32,7 +32,7 @@ def prettify_text(text):
     # remove text clutter and spaces
     text = remove_clutter(clean_spacing(text))
 
-    if len(text) < 3:
+    if not text or len(text) < 3:
         return text
 
     # remove ...
@@ -69,7 +69,7 @@ def ignore_title(title):
     starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
               'Vídeo:', 'Público lança', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
               'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home', 'CR7 exclusivo em', 'http',
-              'Mudança na publicação de comentários online', 'Quiosque:', 'Comente', 'Euromilhões', 'Vote']
+              'Mudança na publicação de comentários online', 'Quiosque:', 'Comente', 'Euromilhões', 'Vote', 'Opinião:']
     for forbidden in starts:
         if title.lower().startswith(forbidden.lower()):
             return True
@@ -120,7 +120,7 @@ def make_absolute(source, timestamp, is_https, url):
     if not url or len(url) == 0:
         raise Exception('URL not provided')
 
-    possible = r'(https://arquivo\.pt)?(/)?(noFrame/replay|wayback)?(/)?([0-9]*)?(?:im_|oe_)?(/)?(https?://[^/]*)?(/)?(.*)?'
+    possible = r'(https://arquivo\.pt)?(/)?(noFrame/replay|wayback)?(/)?([0-9]{14})?(?:im_|oe_|mp_)?(/)?(https?://[^/]*)?(/)?(.*)?'
     match = re.findall(possible, url)
 
     final = ''
@@ -157,3 +157,15 @@ def make_absolute(source, timestamp, is_https, url):
 def generate_dummy_url(source, timestamp, category, title):
     st = '{}-{}-{}-{}'.format(source, timestamp, category, title)
     return 'no-article-url-' + hashlib.sha224(st.encode()).hexdigest()
+
+
+def generate_destaques_uniqueness(category, title, snippet):
+    # use this when a newspaper reuses the same link for different articles, as the scraper default is to use urls as id
+    st = '{}-{}-{}'.format(category, title, snippet)
+    return '?destaques_uniqueness=' + hashlib.sha224(st.encode()).hexdigest()
+
+
+def remove_destaques_uniqueness(url):
+    possible = r'(.*)\?destaques_uniqueness=.*'
+    match = re.findall(possible, url)
+    return match[0] if len(match) > 0 else url

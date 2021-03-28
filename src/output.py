@@ -1,6 +1,8 @@
 import json
 import sqlite3
 
+from src.util import remove_destaques_uniqueness
+
 
 def count_category(cursor, day, month, category):
     res = cursor.execute('''
@@ -86,7 +88,8 @@ def main():
 
         # write file
         res = cursor.execute('''SELECT
-                                    COALESCE(article_urls.redirect_url, articles.article_url) AS article_url,
+                                    --COALESCE(article_urls.redirect_url, articles.article_url) AS article_url, -- this leads to noFrame articles unfortunately
+                                    articles.article_url,
                                     arquivo_source_url,
                                     title,
                                     source,
@@ -109,7 +112,7 @@ def main():
             has_img_url = row[11] and not row[9].endswith('pxTransparente.gif')
 
             daily_news.append({
-                'article_url': row[0],
+                'article_url': remove_destaques_uniqueness(row[0]),
                 'arquivo_source_url': row[1],
                 'title': row[2],
                 'source': row[3],
@@ -118,7 +121,7 @@ def main():
                 'importance': row[6],
                 'headline': row[7],
                 'snippet': row[8],
-                'img_url': row[9] if has_img_url else None,
+                'img_url': remove_destaques_uniqueness(row[9]) if has_img_url else None,
                 'has_article_url': row[10]
             })
 

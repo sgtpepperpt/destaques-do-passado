@@ -5,11 +5,12 @@ from bs4 import BeautifulSoup
 
 
 class Importance(str, Enum):
-    FEATURE: str = 4
-    LARGE: str = 3
-    SMALL: str = 2
-    LATEST: str = 1
-    RELATED: str = 0
+    FEATURE: str = 5
+    LARGE: str = 4
+    SMALL: str = 3
+    LATEST: str = 2
+    RELATED: str = 1
+    UNKNOWN: str = 0
 
 
 class ScraperCentral:

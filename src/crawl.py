@@ -10,6 +10,8 @@ from bs4 import BeautifulSoup
 
 from src.util import is_https_link
 
+# pages can be ignored via timestamp or range of timestamps, eg if page didn't change in consecutive days or there was a page error
+# encoding can be defined like timestamps
 news_sources = [
     {'site': 'news.google.pt', 'from': '20051124000000'},
     {'site': 'publico.pt', 'special': {'20100910150634': '?fl=1', '20110703150815': '?mobile=no'}, 'ignore': ['19961013180344', '19990421171920-20001203173200']},
@@ -23,7 +25,18 @@ news_sources = [
     {'site': 'rtp.pt'},
     {'site': 'dn.pt'},
     {'site': 'tsf.pt'},
-    {'site': 'jn.pt'},
+    {
+        'site': 'jn.pt',
+        'encoding': {
+            '20040605042739-20080314182313': 'utf-8'
+        },
+        'ignore': [
+            '20011014000211', '20011103001652', '20011107005932', '20011107010100', '20011108003840', '20011108010152', '20011116002347', '20011116002419', '20011117011734', '20011128004742',
+            '20021125205745', '20030218052808', '20030407162709', '20030624151104', '20031030000220', '20031214025515', '20031225105031', '20040612021612', '20040616183544', '20081022054919',
+            '20090926013934', '20091218091852', '20060826115813', '20060826202309', '20080215063034', '20081022054919', '20081022055157', '20081022063817', '20090522005146',  '20090623195309',
+            '20100606104209', '20110621150208', '20131115102830', '20100706140103'
+        ]
+    },
     {'site': 'visao.sapo.pt'},
     {'site': 'expresso.pt'},
     {'site': 'sol.sapo.pt'},
@@ -116,6 +129,22 @@ def is_ignored(source, timestamp):
     return False
 
 
+def get_encoding(source, timestamp):
+    if 'encoding' not in source:
+        return None
+
+    if timestamp in source['encoding']:
+        return source['encoding'][timestamp]
+
+    intervals = [ignore for ignore in source['encoding'].keys() if '-' in ignore]
+    for key in intervals:
+        min, max = key.split('-')
+        if min <= timestamp <= max:
+            return source['encoding'][key]
+
+    return None
+
+
 def get_snapshot_list_cdx(source):
     params = {
         'output': 'json',
@@ -181,19 +210,19 @@ def analyse_snapshot_list(snapshots):
     return first, last, months, years
 
 
-def get_page_content(url):
+def get_page_content(url, encoding):
     r = requests.get(url)
-    encoding = chardet.detect(r.content)['encoding'] or 'utf-8'
+    encoding = encoding or chardet.detect(r.content)['encoding'] or 'utf-8'
     return r.content.decode(encoding, errors='replace')
 
 
-def get_page(url):
-    # follow meta refresh tags if existent
-
+def get_page(url, encoding):
     element = True
     while element and url:
-        content = get_page_content(url)
+        content = get_page_content(url, encoding)
         soup = BeautifulSoup(content, features='html5lib')
+
+        # follows meta refresh tags if existent
         element = soup.find('meta', attrs={'http-equiv': 'refresh'})
         if element and 'content' in element and '=' in element['content']:
             url = element['content'].partition('=')[2]
@@ -251,7 +280,7 @@ def crawl_source(source, download=True):
                     page_link += special_requests[snapshot['tstamp']]
 
                 # get page content
-                content = get_page(page_link)
+                content = get_page(page_link, get_encoding(source, snapshot['tstamp']))
                 with open(page, 'w') as f:
                     f.write(content)
 

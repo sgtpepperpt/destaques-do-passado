@@ -6,6 +6,9 @@ import requests
 
 from src.categories import bind_category
 from src.scrapers.google_news_scrapers import *
+from src.scrapers.jornaldenoticias_scrapers import ScraperJornalDeNoticias01, ScraperJornalDeNoticias02, \
+    ScraperJornalDeNoticias03, ScraperJornalDeNoticias04, ScraperJornalDeNoticias05, ScraperJornalDeNoticias06, \
+    ScraperJornalDeNoticias07, ScraperJornalDeNoticias08, ScraperJornalDeNoticias09
 from src.scrapers.news_scraper import ScraperCentral
 from src.scrapers.portugaldiario_scrapers import ScraperPortugalDiario01, ScraperPortugalDiario02, \
     ScraperPortugalDiario03, ScraperPortugalDiario04, ScraperPortugalDiario05, ScraperPortugalDiario06
@@ -20,7 +23,8 @@ def check_urls(cursor):
 
     for url in [url[0] for url in urls if not url[0].startswith('no-article-url')]:
         # noFrame gives us the actual status code
-        no_frame_url = url.replace('arquivo.pt/wayback', 'arquivo.pt/noFrame/replay')
+        # also remove the db uniqueness key
+        no_frame_url = remove_destaques_uniqueness(url.replace('arquivo.pt/wayback', 'arquivo.pt/noFrame/replay'))
 
         try:
             r = requests.head(no_frame_url, allow_redirects=True)
@@ -70,7 +74,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         is_https = filename.split('-')[1] == 's'
 
         # TODO dev only
-        # if int(date) < 20050129221403:
+        # if int(date) < 20110119160209:
         #     continue
 
         with open(file) as f:
@@ -97,7 +101,8 @@ def scrape_source(scraper, source, cursor, db_insert=True):
             category = bind_category(n['category']).value
 
             # add the link to where we got the article from (our source of knowledge)
-            arquivo_source_url = 'https://arquivo.pt/wayback/{}/http{}://{}/'.format(timestamp, 's' if is_https else '', source)
+            # sometimes the source url might be defined by hand (eg when the article is not in the crawled archives, or not on the newpaper's main page)
+            arquivo_source_url = n.get('arquivo_source_url') or 'https://arquivo.pt/wayback/{}/http{}://{}/'.format(timestamp, 's' if is_https else '', source)
 
             # the original link to the article should be unique for each one, thus indicating its uniqueness
             # (article_url does not work, as two different snapshots would have different links pointing to the same)
@@ -105,6 +110,8 @@ def scrape_source(scraper, source, cursor, db_insert=True):
 
             # convert noFrame url to wayback (with sidebar) for UI purposes
             article_url = article_url.replace('noFrame/replay', 'wayback')
+
+            # TODO do snippet, title, headline cleanups here
 
             print(n)
 
@@ -150,11 +157,21 @@ def main():
     scraper.register_scraper(ScraperPortugalDiario04)
     scraper.register_scraper(ScraperPortugalDiario05)
     scraper.register_scraper(ScraperPortugalDiario06)
+    scraper.register_scraper(ScraperJornalDeNoticias01)
+    scraper.register_scraper(ScraperJornalDeNoticias02)
+    scraper.register_scraper(ScraperJornalDeNoticias03)
+    scraper.register_scraper(ScraperJornalDeNoticias04)
+    scraper.register_scraper(ScraperJornalDeNoticias05)
+    scraper.register_scraper(ScraperJornalDeNoticias06)
+    scraper.register_scraper(ScraperJornalDeNoticias07)
+    scraper.register_scraper(ScraperJornalDeNoticias08)
+    scraper.register_scraper(ScraperJornalDeNoticias09)
 
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
     scrape_source(scraper, 'publico.pt', cursor)
     scrape_source(scraper, 'portugaldiario.iol.pt', cursor)
+    scrape_source(scraper, 'jn.pt', cursor)
 
     # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)
