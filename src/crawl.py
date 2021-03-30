@@ -1,3 +1,4 @@
+from glob import glob
 import json
 import os
 from collections import Counter
@@ -13,18 +14,20 @@ from src.util import is_https_link, get_actual_source
 # pages can be ignored via timestamp or range of timestamps, eg if page didn't change in consecutive days or there was a page error
 # encoding can be defined like timestamps
 news_sources = [
-    {'site': 'news.google.pt', 'from': '20051124000000'},
-    {'site': 'publico.pt', 'special': {'20100910150634': '?fl=1', '20110703150815': '?mobile=no'}, 'ignore': ['19961013180344', '19990421171920-20001203173200']},
-    {'site': 'ultimahora.publico.pt'},
-    {'site': 'sabado.pt'},
-    {'site': 'diariodigital.pt'},
-    {'site': 'iol.pt'},
-    {'site': 'aeiou.pt'},
-    {'site': 'portugaldiario.iol.pt', 'ignore': ['20001119134000', '20001202055200', '20010202072300', '20050325075505', '20050828053247'], 'to': '20100626141610'},  # becomes a redirect to tvi24 after
-    {'site': 'sicnoticias.sapo.pt'},
-    {'site': 'rtp.pt'},
-    {'site': 'dn.pt'},
-    {'site': 'tsf.pt'},
+    {
+        'site': 'news.google.pt',
+        'from': '20051124000000'
+    },
+    {
+        'site': 'publico.pt',
+        'special': {'20100910150634': '?fl=1', '20110703150815': '?mobile=no'},
+        'ignore': ['19961013180344', '19990421171920-20001203173200']
+    },
+    {
+        'site': 'portugaldiario.iol.pt',
+        'ignore': ['20001119134000', '20001202055200', '20010202072300', '20050325075505', '20050828053247'],
+        'to': '20100626141610'  # becomes a redirect to tvi24 after
+    },
     {
         'site': 'jn.pt',
         'encoding': {
@@ -37,8 +40,31 @@ news_sources = [
             '20100606104209', '20110621150208', '20131115102830', '20100706140103'
         ]
     },
+    {
+        'site': 'expresso.pt',
+        'ignore': [
+            '20000303215339', '20000304003451', '20000511112040', '20000614221642-20000815100152', '20001019034724-20010519195029', '20010924001343', '20010930112729', '20011002002004',
+            '20011014233012', '20010930234309', '20011021145713', '20011022031247', '20011028041447', '20011029044539', '20011104005540', '20011105005759', '20011111012646', '20011112013327',
+            '20011114004021', '20011125030751', '20011126050422', '20011202173222', '20011209175945', '20030327225541', '20030408155413', '20011021154458', '20011022040823', '20011028212409',
+            '20011029054219', '20011104014656', '20011105022015', '20011111014527', '20011114010516', '20011125161129', '20011202184517', '20011209191928', '20011023013327', '20011104140315',
+            '20011106011738', '20011111140017', '20011115021401', '20011116000618', '20011116080231', '20040606233331-20040612075222', '20040626033600-20040701060606', '20040724050140',
+            '20040725065449', '20051223054221', '20070614005353', '20040903045728-20041215022252', '20050401233212-20050621185523', '20051124222130', '20051125040706', '20051225095630-20051231182511',
+            '20090925190706-20091218062538', '20060102013519', '20060103082829', '20060108135453', '20060101042421', '20060102045952', '20060101123534', '20060102081843', '20091218182923',
+            '20060101153422', '20060102113344', '20060101172409', '20060102153620', '20060101201140', '20060102173036', '20060101233307', '20060102205258', '20060102234035', '20061023050337',
+            '20070614005353', '20090628235239'
+        ]
+    },
+    {'site': 'ultimahora.publico.pt'},
+    {'site': 'sabado.pt'},
+
+    {'site': 'iol.pt'},
+    {'site': 'aeiou.pt'},
+    {'site': 'sicnoticias.sapo.pt'},
+    {'site': 'diariodigital.pt'},
+    {'site': 'rtp.pt'},
+    {'site': 'dn.pt'},
+    {'site': 'tsf.pt'},
     {'site': 'visao.sapo.pt'},
-    {'site': 'expresso.pt'},
     {'site': 'sol.sapo.pt'},
     {'site': 'tvi24.iol.pt'},
 
@@ -225,10 +251,19 @@ def get_page(url, encoding):
         content, actual_url = get_page_content(url, encoding)
         soup = BeautifulSoup(content, features='html5lib')
 
-        # follows meta refresh tags if existent
+        # follows meta refresh tags if existent, useful to get over interstitials
         element = soup.find('meta', attrs={'http-equiv': 'refresh'})
-        if element and 'content' in element and '=' in element['content']:
-            url = element['content'].partition('=')[2]
+        if element and element.get('content') and '=' in element.get('content'):
+            new_url = element['content'].partition('=')[2]
+
+            if new_url.startswith('/noFrame/replay'):
+                # handle relative urls
+                new_url = 'https://arquivo.pt' + new_url
+
+            if new_url == url:
+                break  # no changes, so stop looking
+
+            url = new_url
         else:
             element = None
 
@@ -276,19 +311,23 @@ def crawl_source(source, download=True):
                 with open(img, 'wb') as f:
                     f.write(r.content)
 
-            page = os.path.join(page_dir, snapshot['tstamp'] + https + '.html')
-            if not os.path.exists(page):  # by adding the source url to the filename this becomes unnecessary, since we can't predict the filename before making the request
-                page_link = snapshot['linkToNoFrame']
+            page = os.path.join(page_dir, snapshot['tstamp'] + https + '*.html')
+
+            # only download if no file starting by the current timestamp exists
+            if len(glob(page)) == 0:
+                link = snapshot['linkToNoFrame']
                 if snapshot['tstamp'] in special_requests:  # use this if for some reason need to request a different link for a day
-                    page_link += special_requests[snapshot['tstamp']]
+                    link += special_requests[snapshot['tstamp']]
 
                 # get page content
                 encoding = get_encoding(source, snapshot['tstamp'])
-                content, actual_url = get_page(page_link, encoding)
+                content, actual_url = get_page(link, encoding)
 
                 # get the actual url
                 if actual_url:
                     page = os.path.join(page_dir, snapshot['tstamp'] + https + '-' + actual_url + '.html')
+                else:
+                    page = os.path.join(page_dir, snapshot['tstamp'] + https + '.html')
 
                 with open(page, 'w') as f:
                     f.write(content)

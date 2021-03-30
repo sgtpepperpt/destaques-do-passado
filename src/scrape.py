@@ -5,6 +5,11 @@ import sqlite3
 import requests
 
 from src.categories import bind_category
+from src.scrapers.expresso_scrapers import ScraperExpresso01, ScraperExpresso02, ScraperExpresso03, ScraperExpresso04, \
+    ScraperExpresso05, ScraperExpresso06, ScraperExpresso07, ScraperExpresso08, ScraperExpresso09, ScraperExpresso10, \
+    ScraperExpresso11, ScraperExpresso12, ScraperExpresso13, ScraperExpresso14, ScraperExpresso15, ScraperExpresso16, \
+    ScraperExpresso17, ScraperExpresso18, ScraperExpresso19, ScraperExpresso21, ScraperExpresso20, ScraperExpresso23, \
+    ScraperExpresso22, ScraperExpresso24, ScraperExpresso25, ScraperExpresso26, ScraperExpresso27, ScraperExpresso28
 from src.scrapers.google_news_scrapers import *
 from src.scrapers.jornaldenoticias_scrapers import ScraperJornalDeNoticias01, ScraperJornalDeNoticias02, \
     ScraperJornalDeNoticias03, ScraperJornalDeNoticias04, ScraperJornalDeNoticias05, ScraperJornalDeNoticias06, \
@@ -67,9 +72,9 @@ def create_database(cursor):
 
 
 def scrape_source(scraper, source, cursor, db_insert=True):
-    for file in sorted([p for p in pathlib.Path(os.path.join('crawled', source, 'pages')).iterdir() if p.is_file()]):
-        print(file.name)
+    for file in sorted([p for p in pathlib.Path(os.path.join('crawled', source, 'pages')).iterdir() if p.is_file() and p.name != '.DS_Store']):
         filename = file.name.replace('.html', '')
+        print(filename)
 
         elems = filename.split('-')
         date = elems[0]
@@ -77,7 +82,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         actual_url = elems[2].replace('*', ':') if len(elems) > 2 else None
 
         # TODO dev only
-        # if int(date) < 20020327105712:
+        # if int(date) < 20120701230207:
         #     continue
 
         with open(file) as f:
@@ -171,12 +176,41 @@ def main():
     scraper.register_scraper(ScraperJornalDeNoticias07)
     scraper.register_scraper(ScraperJornalDeNoticias08)
     scraper.register_scraper(ScraperJornalDeNoticias09)
+    scraper.register_scraper(ScraperExpresso01)
+    scraper.register_scraper(ScraperExpresso02)
+    scraper.register_scraper(ScraperExpresso03)
+    scraper.register_scraper(ScraperExpresso04)
+    scraper.register_scraper(ScraperExpresso05)
+    scraper.register_scraper(ScraperExpresso06)
+    scraper.register_scraper(ScraperExpresso07)
+    scraper.register_scraper(ScraperExpresso08)
+    scraper.register_scraper(ScraperExpresso09)
+    scraper.register_scraper(ScraperExpresso10)
+    scraper.register_scraper(ScraperExpresso11)
+    scraper.register_scraper(ScraperExpresso12)
+    scraper.register_scraper(ScraperExpresso13)
+    scraper.register_scraper(ScraperExpresso14)
+    scraper.register_scraper(ScraperExpresso15)
+    scraper.register_scraper(ScraperExpresso16)
+    scraper.register_scraper(ScraperExpresso17)
+    scraper.register_scraper(ScraperExpresso18)
+    scraper.register_scraper(ScraperExpresso19)
+    scraper.register_scraper(ScraperExpresso20)
+    scraper.register_scraper(ScraperExpresso21)
+    scraper.register_scraper(ScraperExpresso22)
+    scraper.register_scraper(ScraperExpresso23)
+    scraper.register_scraper(ScraperExpresso24)
+    scraper.register_scraper(ScraperExpresso25)
+    scraper.register_scraper(ScraperExpresso26)
+    scraper.register_scraper(ScraperExpresso27)
+    scraper.register_scraper(ScraperExpresso28)
 
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
     scrape_source(scraper, 'publico.pt', cursor)
     scrape_source(scraper, 'portugaldiario.iol.pt', cursor)
     scrape_source(scraper, 'jn.pt', cursor)
+    scrape_source(scraper, 'expresso.pt', cursor)
 
     # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)

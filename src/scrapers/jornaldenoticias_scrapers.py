@@ -3,7 +3,7 @@ import re
 from bs4 import Tag, Comment, NavigableString
 
 from src.util import prettify_text, ignore_title, remove_clutter, generate_dummy_url, clean_special_chars, \
-    generate_destaques_uniqueness
+    generate_destaques_uniqueness, is_between, find_comments, find_comments_regex
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
@@ -1775,24 +1775,6 @@ class ScraperJornalDeNoticias07(NewsScraper):
 
         self.used = True
         return all_news
-
-
-def is_between(first, last, element):
-    next = first
-    while next and next != last:
-        if next == element:
-            return True
-        else:
-            next = next.next
-    return False
-
-
-def find_comments(parent, content):
-    return parent.find_all(string=lambda text: isinstance(text, Comment) and text == content)
-
-
-def find_comments_regex(parent, content):
-    return parent.find_all(string=lambda text: isinstance(text, Comment) and re.match(content, text))
 
 
 def get_snippet_navigable_strings(element):

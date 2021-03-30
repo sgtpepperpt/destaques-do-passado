@@ -22,7 +22,8 @@ def source_name_from_file(source):
         'publico.pt': 'Público',
         'ultimahorapublico.pt': 'Público',
         'portugaldiario.iol.pt': 'Portugal Diário',
-        'jn.pt': 'Jornal de Notícias'
+        'jn.pt': 'Jornal de Notícias',
+        'expresso.pt': 'Expresso'
     }
 
     return sources[source]

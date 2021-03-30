@@ -1,6 +1,8 @@
 import hashlib
 import re
 
+from bs4 import Comment
+
 
 def clean_spacing(text):
     return ' '.join(text.split()).strip()
@@ -69,12 +71,13 @@ def ignore_title(title):
     starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
               'Vídeo:', 'Público lança', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
               'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home', 'CR7 exclusivo em', 'http',
-              'Mudança na publicação de comentários online', 'Quiosque:', 'Comente', 'Euromilhões', 'Vote', 'Opinião:']
+              'Mudança na publicação de comentários online', 'Quiosque:', 'Comente', 'Euromilhões', 'Vote', 'Opinião:',
+              'Nota editorial', 'Faça aqui', 'Expresso nos', 'Já pensou onde ir', 'Top 10']
     for forbidden in starts:
         if title.lower().startswith(forbidden.lower()):
             return True
 
-    contains = ['(exclusivo assinantes)', 'Veja o vídeo']
+    contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso']
     for forbidden in contains:
         if forbidden.lower() in title.lower():
             return True
@@ -175,3 +178,21 @@ def remove_destaques_uniqueness(url):
     possible = r'(.*)\?destaques_uniqueness=.*'
     match = re.findall(possible, url)
     return match[0] if len(match) > 0 else url
+
+
+def is_between(first, last, element):
+    next = first
+    while next and next != last:
+        if next == element:
+            return True
+        else:
+            next = next.next
+    return False
+
+
+def find_comments(parent, content):
+    return parent.find_all(string=lambda text: isinstance(text, Comment) and text == content)
+
+
+def find_comments_regex(parent, content):
+    return parent.find_all(string=lambda text: isinstance(text, Comment) and re.match(content, text))
