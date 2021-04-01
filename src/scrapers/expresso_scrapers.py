@@ -1105,7 +1105,7 @@ class ScraperExpresso27(NewsScraper):
 
 class ScraperExpresso28(NewsScraper):
     source = 'expresso.pt'
-    cutoff = 20210129160454
+    cutoff = 20131108023914
 
     def scrape_page(self, soup):
         all_news = []
@@ -1162,5 +1162,102 @@ class ScraperExpresso28(NewsScraper):
         # SECTIONS
         # sections = soup.find_all('div', class_='auto-block-middle')
         # can't get these yellow boxes at the end, seems like they're loaded asynchronously
+
+        return all_news
+
+
+class ScraperExpresso29(NewsScraper):
+    source = 'expresso.pt'
+    cutoff = 20150424124458
+
+    def scrape_page(self, soup):
+        all_news = []
+
+        articles = soup.find_all('article', class_=re.compile(r'^manchete(SmallBox|Box|Top)$'))
+        for article_elem in articles:
+            # ignore opinion pieces
+            if article_elem.find('div', class_='opiniaoItem'):
+                continue
+
+            title_elem = article_elem.find('h2', class_=re.compile(r'bigTitle|smallTitle')).find('a')
+            title = remove_clutter(title_elem.get_text())
+            if ignore_title(title):
+                continue
+
+            headline_elem = article_elem.find('div', class_='preTitle')
+            headline = remove_clutter(headline_elem.get_text()) if headline_elem else None
+
+            snippet_elem = article_elem.find('h3', class_=re.compile(r'smallText|textoMancheteSmall'))
+            snippet = prettify_text(snippet_elem.get_text()) if snippet_elem else None
+
+            img_elem = article_elem.find('figure')
+            img_url = img_elem.find('img').get('src') if img_elem else None
+
+            importance = Importance.FEATURE if 'mancheteSmallBox' in article_elem.get('class') else (Importance.LARGE if 'mancheteBox' in article_elem.get('class') else Importance.SMALL)
+
+            all_news.append({
+                'article_url': title_elem.get('href'),
+                'title': title,
+                'snippet': snippet,
+                'headline': headline,
+                'img_url': img_url,
+                'category': 'Destaque',
+                'importance': importance
+            })
+
+            # find related
+            for title_elem in [e.find('a') for e in article_elem.find_all('span', class_='related')]:
+                all_news.append({
+                    'article_url': title_elem.get('href'),
+                    'title': title,
+                    'category': 'Destaque',
+                    'importance': Importance.RELATED
+                })
+
+        return all_news
+
+
+class ScraperExpresso30(NewsScraper):
+    source = 'expresso.pt'
+    cutoff = 20151201102835  # could work after this, haven't tested
+
+    def scrape_page(self, soup):
+        all_news = []
+
+        articles = soup.find_all('article', class_='AT-noticia')
+        articles = [a for a in articles if
+                    'MC-iniciativaseprodutos.marketing' not in a.get('class')  # ignore marketing
+                    and a.find_parent('div').get('data-type') == 'default'  # ignore quotes, etc.
+                    ]
+
+        for article_elem in articles:
+            title_elem = article_elem.find('h1', class_='title').find('a')
+            title = remove_clutter(title_elem.get_text())
+            if ignore_title(title):
+                continue
+
+            #headline_elem = article_elem.find('div', class_='preTitle')
+            #headline = remove_clutter(headline_elem.get_text()) if headline_elem else None
+
+            snippet_elem = article_elem.find('h2', class_='lead')
+            snippet = prettify_text(snippet_elem.get_text()) if snippet_elem else None
+
+            img_elem = article_elem.find('figure')
+            img_url = img_elem.find('img').get('src') if img_elem else None
+
+            # find article relevance, start by seeing if we're related
+            if article_elem.find_parent('ul', class_='relatedInList'):
+                importance = Importance.RELATED
+            else:
+                importance = Importance.FEATURE if 'headline' in article_elem.get('class') else Importance.LARGE
+
+            all_news.append({
+                'article_url': title_elem.get('href'),
+                'title': title,
+                'snippet': snippet,
+                'img_url': img_url,
+                'category': 'Destaque',
+                'importance': importance
+            })
 
         return all_news

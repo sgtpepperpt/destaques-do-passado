@@ -52,7 +52,7 @@ def prettify_text(text):
         text = text[:-1].strip()
 
     # remove Odivelas, 11 jun (Lusa) --
-    groups = re.search(r'^[A-Za-z\s]+, [0-9]+ [A-Za-z]+ \(Lusa\) --? (.*)', text)
+    groups = re.search(r'^[A-Za-zÀ-ÿ\s]+, [0-9]+ [A-Za-z]+ \(Lusa\) --? (.*)', text)
     if groups:
         text = groups.group(1)
 
@@ -69,15 +69,17 @@ def prettify_text(text):
 
 def ignore_title(title):
     starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
-              'Vídeo:', 'Público lança', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
-              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home', 'CR7 exclusivo em', 'http',
+              'Vídeo:', 'Público lança', 'Público vence', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
+              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home ', 'CR7 exclusivo em', 'http',
               'Mudança na publicação de comentários online', 'Quiosque:', 'Comente', 'Euromilhões', 'Vote', 'Opinião:',
-              'Nota editorial', 'Faça aqui', 'Expresso nos', 'Já pensou onde ir', 'Top 10']
+              'Nota editorial', 'Faça aqui', 'Expresso nos', 'Já pensou onde ir', 'Top 10', 'Conheça as novidades do site',
+              'Justiça seja feita', 'Revista \'Lui\' tira a roupa']
     for forbidden in starts:
         if title.lower().startswith(forbidden.lower()):
             return True
 
-    contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso']
+    contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso', 'para a casa ir abaixo',
+                'Expresso Diário', 'dicas para', 'A 1ª página do Expresso', 'A primeira página do', 'a Revista E']
     for forbidden in contains:
         if forbidden.lower() in title.lower():
             return True
@@ -123,6 +125,12 @@ def make_absolute(source, timestamp, is_https, url):
     if not url or len(url) == 0:
         raise Exception('URL not provided')
 
+    if url.startswith('//'):
+        # publico misses http sometimes
+        # eg '//arquivo.pt/noFrame/replay/20151231180213///www.publico.pt/economia/noticia/pensoes-ate-6288-euros-aumentam-04-a-partir-de-1-de-janeiro-1718873'
+        url = 'https' + url
+        url = url.replace('///', '/')
+
     possible = r'(https://arquivo\.pt)?(/)?(noFrame/replay|wayback)?(/)?([0-9]{14})?(?:im_|oe_|mp_)?(/)?(https?://[^/]*)?(/)?(.*)?'
     match = re.findall(possible, url)
 
@@ -152,7 +160,7 @@ def make_absolute(source, timestamp, is_https, url):
         final += '/'
 
     if not match[0][8]:
-        raise Exception('Error in absolute url')
+        raise Exception('Error in absolute url')  # shouldn't be error if some urls have no path, just domain, like leitor.expresso.pt (we ignore those bus it SHOULD be valid if we didn't)
 
     return final + url
 

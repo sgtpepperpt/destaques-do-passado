@@ -1945,13 +1945,13 @@ class ScraperJornalDeNoticias08(NewsScraper):
 
 class ScraperJornalDeNoticias09(NewsScraper):
     source = 'jn.pt'
-    cutoff = 20180314182313
+    cutoff = 20141001170209
 
     def extract_news(self, all_news, elem_list, default_importance):
         for elem in elem_list:
-            is_special_box = elem.find_parent('div', class_='caixa655') is not None or elem.find_parent('div', class_='caixa250') is not None
+            is_special_box = elem.find_parent('div', class_=re.compile(r'(caixa655|caixa250)')) is not None
 
-            if elem.find('div', class_=lambda x: x == 'NoticiaJNLive' or x == 'VideoEsq'):
+            if elem.find('div', class_=re.compile(r'(NoticiaJNLive|VideoEsq)')):
                 continue
 
             img_url = None
@@ -1972,45 +1972,14 @@ class ScraperJornalDeNoticias09(NewsScraper):
                     if img_elem:
                         img_url = img_elem.find('img').get('src')
 
-            if not is_special_box:
-                elem = elem.find('div', class_=lambda x: x != 'Photo' and x != 'assinatura')
+            inner_elem = elem.find('div', class_=re.compile(r'(Photo|assinatura)'))
+            if not is_special_box and inner_elem and inner_elem.find('h1'):
+                elem = inner_elem
 
             # search for a div with category
-            category = 'Destaque'
-            if elem.find('div', class_='BoxHeaderFutebol'):
-                category = 'Desporto'
-
-            elif elem.find('div', class_='HeaderGente'):
-                category = 'Gente'
-
-            # specifically for Legislativas 2009 articles
-            elif is_special_box:
-                box_parent = elem.find_parent('div', class_='caixa250') or elem.find_parent('div', class_='caixa655')
-
-                if box_parent and box_parent.find('div', class_='title'):
-                    category_elem = box_parent.find('div', class_='title').find('a')
-
-                    if not category_elem:
-                        # must be presidenciais 2011
-                        category = 'Política'
-                    elif category_elem.get_text() == 'Legislativas 2009':
-                        category = 'Política'
-                        elem = elem.find('div')  # only this box iteration needs this
-                    elif category_elem.get_text() == 'Mundial 2010':
-                        category = 'Desporto'
-
-            # "mais notícias" section
-            elif elem.find_parent('div', id='ctl00_ctl00_bcr_bcr_Rodape_ctl03_ctl00_contentDiv'):
-                category = 'Outras'
-                default_importance = Importance.SMALL
-
-            elif elem.find_parent('table'):
-                header_elem = elem.find_parent('table').find('div', class_='PageHeader')
-                if header_elem:
-                    category = header_elem.get_text()
-
-                    if category == 'Vídeo':
-                        continue
+            category, default_importance = self.get_category(default_importance, elem, is_special_box)
+            if category == 'Vídeo':
+                continue
 
             title_elem = elem.find_all('h1')[-1].find('a')
 
@@ -2037,8 +2006,48 @@ class ScraperJornalDeNoticias09(NewsScraper):
                         'importance': Importance.RELATED
                     })
 
+    def get_category(self, default_importance, elem, is_special_box):
+        category = 'Destaque'
+        if elem.find('div', class_='BoxHeaderFutebol'):
+            category = 'Desporto'
+
+        elif elem.find('div', class_='HeaderGente'):
+            category = 'Gente'
+
+        # specifically for Legislativas 2009 articles
+        elif is_special_box:
+            box_parent = elem.find_parent('div', class_='caixa250') or elem.find_parent('div', class_='caixa655')
+
+            if box_parent and box_parent.find('div', class_='title'):
+                category_elem = box_parent.find('div', class_='title').find('a')
+
+                if not category_elem:
+                    # must be presidenciais 2011
+                    category = 'Política'
+                elif category_elem.get_text() == 'Legislativas 2009':
+                    category = 'Política'
+                    elem = elem.find('div')  # only this box iteration needs this
+                elif category_elem.get_text() == 'Mundial 2010':
+                    category = 'Desporto'
+
+        # "mais notícias" section
+        elif elem.find_parent('div', id='ctl00_ctl00_bcr_bcr_Rodape_ctl03_ctl00_contentDiv'):
+            category = 'Outras'
+            default_importance = Importance.SMALL
+
+        elif elem.find_parent('table'):
+            header_elem = elem.find_parent('table').find('div', class_='PageHeader')
+            if header_elem:
+                category = header_elem.get_text()
+
+        return category, default_importance
+
     def scrape_page(self, soup):
         all_news = []
+
+        # big feature
+        article_elems = soup.find_all('div', class_='Manchete')
+        self.extract_news(all_news, [f.find('div', class_='Content') for f in article_elems], Importance.FEATURE)
 
         # bold box at top right corner usually
         article_elems = soup.find_all('div', class_='Caixa')
@@ -2050,7 +2059,10 @@ class ScraperJornalDeNoticias09(NewsScraper):
 
         # more large articles, not features
         article_elems = soup.find_all('div', class_='Noticia')
-        self.extract_news(all_news, [f.find('div', class_='Content') for f in article_elems if not f.find_parent('div', class_='news-content') and not f.find_parent('div', id='ctl00_ctl00_bcr_bcr_TwitterBox_TwitterScript')], Importance.LARGE)  # avoid a twitter box 20100615140117
+        self.extract_news(all_news, [f.find('div', class_='Content') for f in article_elems
+                                     if not f.find_parent('div', class_='news-content')
+                                     and not f.find_parent('div', id='ctl00_ctl00_bcr_bcr_TwitterBox_TwitterScript')
+                                     ], Importance.LARGE)  # avoid a twitter box 20100615140117
 
         # newer versions had this box
         new_articles = soup.find_all('div', class_='news-content')
@@ -2065,6 +2077,7 @@ class ScraperJornalDeNoticias09(NewsScraper):
             l = l.find('div', id='tabn_1_data').find_all('li', class_=re.compile(r'RegularItem[2]*'))
         else:
             l = []
+
         latest_elems2 = [e.find('a') for e in l]
 
         for title_elem in latest_elems1 + latest_elems2:
@@ -2077,16 +2090,78 @@ class ScraperJornalDeNoticias09(NewsScraper):
 
         # local news
         local_elems = soup.find('div', class_='DestaqueConcelhoHome')
-        for i in range(0, len(local_elems.contents), 2):
-            headline_elem = local_elems.contents[i].find('a')
-            title_elem = local_elems.contents[i+1].find('a')
+        extract_local_news(all_news, local_elems)
+
+        return all_news
+
+
+def extract_local_news(all_news, local_elems):
+    for i in range(0, len(local_elems.contents), 2):
+        headline_elem = local_elems.contents[i].find('a')
+        title_elem = local_elems.contents[i + 1].find('a')
+
+        all_news.append({
+            'article_url': title_elem.get('href'),
+            'title': remove_clutter(title_elem.get_text()),
+            'headline': headline_elem.get_text(),
+            'category': 'Local',
+            'importance': Importance.SMALL
+        })
+
+
+class ScraperJornalDeNoticias10(NewsScraper):
+    source = 'jn.pt'
+    cutoff = 20151201103233  # could work past this, not tested
+
+    def scrape_page(self, soup):
+        all_news = []
+
+        article_elems = soup.find_all('div', class_=re.compile(r'^(Destaque|Caixa|Noticia)$'))
+        article_elems = [e for e in article_elems if e.find('div', class_=re.compile(r'^NoticiaGeral'))]
+
+        for article_elem in [e.find('div', class_=re.compile(r'c|Content')) for e in article_elems]:
+            # find an h1 with a url
+            title_elem = [e.find('a') for e in article_elem.find_all('h1') if e.find('a')][0]
+            title = remove_clutter(title_elem.get_text())
+
+            snippet_elem = article_elem.find('div', class_='destaque-common-summary')
+            snippet = prettify_text(snippet_elem.get_text()) if snippet_elem else None
+
+            img_elem = article_elem.find('a').find('img', class_='Photo')
+            if not img_elem:
+                # alternative for NoticiaGeralMN
+                img_elem = [e for e in article_elem.find_all('img') if is_between(article_elem, title_elem, e)]
+                img_elem = img_elem[0] if len(img_elem) > 0 else None
+
+            # find category from parent
+            category = 'Destaque'
+            if article_elem.find_parent('div', class_='NoticiasPaisHP'):
+                category = 'País'
+            elif article_elem.find_parent('div', class_='Desporto250'):
+                category = 'Desporto'
 
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
-                'headline': headline_elem.get_text(),
-                'category': 'Local',
-                'importance': Importance.SMALL
+                'title': title,
+                'snippet': snippet,
+                'img_url': img_elem.get('src') if img_elem else None,
+                'category': category,
+                'importance': Importance.LARGE
             })
+
+            # RELATED ELEMS
+            related_elems = article_elem.find('ul', class_='artigos_related')
+            if related_elems:
+                for title_elem in [e.find('a') for e in related_elems.find_all('li')]:
+                    all_news.append({
+                        'article_url': title_elem.get('href'),
+                        'title': title_elem.get_text(),
+                        'category': category,
+                        'importance': Importance.RELATED
+                    })
+
+        # LOCAL NEWS
+        local_elems = soup.find('div', class_='DestaqueConcelhoHome')
+        extract_local_news(all_news, local_elems)
 
         return all_news

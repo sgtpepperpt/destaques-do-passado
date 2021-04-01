@@ -37,7 +37,7 @@ news_sources = [
             '20011014000211', '20011103001652', '20011107005932', '20011107010100', '20011108003840', '20011108010152', '20011116002347', '20011116002419', '20011117011734', '20011128004742',
             '20021125205745', '20030218052808', '20030407162709', '20030624151104', '20031030000220', '20031214025515', '20031225105031', '20040612021612', '20040616183544', '20081022054919',
             '20090926013934', '20091218091852', '20060826115813', '20060826202309', '20080215063034', '20081022054919', '20081022055157', '20081022063817', '20090522005146',  '20090623195309',
-            '20100606104209', '20110621150208', '20131115102830', '20100706140103'
+            '20100606104209', '20110621150208', '20131115102830', '20100706140103', '20150416191052-20150505170210'
         ]
     },
     {
@@ -177,7 +177,7 @@ def get_snapshot_list_cdx(source):
         'fields': 'url,timestamp',
         'filter': '!~status:4|5',
         'url': source['site'],
-        'to': source.get('to') or '20131231235959'
+        'to': source.get('to') or '20151231235959'
     }
 
     if 'from' in source:
@@ -254,6 +254,9 @@ def get_page(url, encoding):
         # follows meta refresh tags if existent, useful to get over interstitials
         element = soup.find('meta', attrs={'http-equiv': 'refresh'})
         if element and element.get('content') and '=' in element.get('content'):
+            if element.get('content').startswith('0'):
+                break
+
             new_url = element['content'].partition('=')[2]
 
             if new_url.startswith('/noFrame/replay'):

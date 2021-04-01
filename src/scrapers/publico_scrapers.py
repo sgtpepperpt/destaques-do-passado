@@ -1,5 +1,7 @@
 import re
 
+from bs4 import NavigableString, Comment
+
 from src.util import prettify_text, clean_special_chars, ignore_title, remove_clutter, generate_dummy_url
 
 from src.scrapers.news_scraper import NewsScraper, Importance
@@ -685,11 +687,13 @@ class ScraperPublico07(NewsScraper):
 
 class ScraperPublico08(NewsScraper):
     source = 'publico.pt'
-    cutoff = 20131112190529  # could work past this, not tested
+    cutoff = 20151231180213  # could work past this, not tested
 
     all_news = []
 
     def scrape_page(self, soup):
+        self.all_news = []
+
         articles = soup.find_all('article')
         for article in articles:
             self.get_main_article(article)
@@ -702,39 +706,88 @@ class ScraperPublico08(NewsScraper):
             self.extract_section_feature(section, category)
             self.extract_section_small(section, category)
 
-        all_news = self.all_news
-        self.all_news = []
-        return all_news
+        # latest section
+        latest_elem = soup.find('section', class_='latest-headlines')
+        self.get_latest_articles(latest_elem)
+
+        return self.all_news
 
     def get_main_article(self, article):
+        category = 'Destaque'
+
+        headline = None
         if article.find_parent(class_='entries-collection'):
+            # if article is in a collection, then that collection header has the pretitle
+            # and the category can be decided from it too
+            headline_elem = article.find_parent(class_='entries-collection').find('h1', class_='collection-title')
+            headline_data = self.get_collection_data(headline_elem)
+            if headline_data:
+                category, headline = headline_data
+            else:
+                return
+
+        # sometimes there's a red element pretitle, should replace the one above
+        headline_elem = article.find('h3', class_='rubric-title')
+        if headline_elem:
+            headline = remove_clutter(headline_elem.get_text())
+
+            if headline in ['LIFE&STYLE', 'Crónica', 'Revista 2', 'Opinião']:
+                return
+
+            if headline in ['Desporto', 'Crónica de jogo']:
+                category = 'Desporto'
+
+        # we don't want a desporto desporto
+        if headline == category:
+            headline = None
+
+        # ignore special articles
+        if article.find_parent(id=re.compile(r'network-features-[0-9]*')):
             return
 
         # ignore articles whose content is a video
         if article.find(attrs={'data-fonte': 'VIDEO_SIMPLES'}):
             return
 
-        header = article.find('header')
+        # SNIPPET
         snippet = article.find(class_='entry-summary')
         if snippet:
-            snippet = process_snippet(snippet.find('p').find(text=True))
+            snippet = process_snippet(snippet.find('p').get_text())
             if snippet is None:
                 return
 
+        # IMAGE
         img = article.find('figure')
         if img:
-            img = img.find('img')['src']
+            img = img.find('img').get('src')
 
+        # get header, where we can find the title and url
+        header = article.find('header')
+        if not header:
+            special_header = article.find('h2', class_='entry-title')
+            if special_header:
+                # 20151004170208, big image, does not have the header elem, but this serves as replacement
+                header = special_header.find_parent('div', class_='entry-text')
+            else:
+                return  # 20151004170208, it's a 'latest' kind of element
+
+        # TITLE
         title = extract_title(header.find('h2'))
-        if ignore_title(title):
+        if not title or ignore_title(title) or title == 'Home':  # a random Home element that appears at 20130912160209
             return
 
+        # URL
+        url_elem = header.find('a')
+        if not url_elem:
+            return  # 20150518170302, call to action, not an article
+
         self.all_news.append({
-            'article_url': header.find('a')['href'],
+            'article_url': url_elem.get('href'),
             'title': title,
             'snippet': snippet,
+            'headline': headline,
             'img_url': img,
-            'category': 'Destaque',
+            'category': category,
             'importance': Importance.FEATURE
         })
 
@@ -742,22 +795,29 @@ class ScraperPublico08(NewsScraper):
         related = article.find(class_='related-entries')
         if related:
             for news in related.find_all('li'):
-                self.extracted_related_article(news)
+                self.extracted_related_article(news, category)
 
-    def extracted_related_article(self, article):
-        title = extract_title(article.find('a'))
+    def extracted_related_article(self, article, category):
+        title = extract_title(article.find('h3') or article.find('a'))
         if ignore_title(title):
             return
+
+        img = article.find('figure')
+        if img:
+            img = img.find('img').get('src')
 
         self.all_news.append({
             'article_url': article.find('a')['href'],
             'title': title,
-            'category': 'Outras',
+            'img_url': img,
+            'category': category if category != 'Destaque' else 'Outras',
             'importance': Importance.RELATED
         })
 
     def extract_section_feature(self, section, category):
         feature_box = section.find(class_='section-featured')
+        if not feature_box:
+            return  # 20140728170302, categories started being loaded asynchronously, so they're not archived
 
         title_elem = feature_box.find('a')
         if not title_elem:
@@ -784,9 +844,11 @@ class ScraperPublico08(NewsScraper):
         })
 
     def extract_section_small(self, section, category):
-        others = section.find(class_='section-headlines').find_all('li')
+        others = section.find(class_='section-headlines')
+        if not others:
+            return  # 20140728170302 as above
 
-        for other in others:
+        for other in others.find_all('li'):
             title = extract_title(other.find('a'))
             if ignore_title(title):
                 return
@@ -798,6 +860,19 @@ class ScraperPublico08(NewsScraper):
                 'title': title,
                 'category': category,
                 'importance': Importance.SMALL
+            })
+
+    def get_latest_articles(self, latest_elem):
+        for title_elem in [e.find('a') for e in latest_elem.find_all('li')]:
+            # content of a, but excluding time tag
+            title = ' '.join(
+                [e for e in title_elem.contents if isinstance(e, NavigableString) and not isinstance(e, Comment)])
+
+            self.all_news.append({
+                'article_url': title_elem.get('href'),
+                'title': remove_clutter(title),
+                'category': 'Destaque',
+                'importance': Importance.LATEST
             })
 
     def cleanup_url(self, url):
@@ -814,3 +889,94 @@ class ScraperPublico08(NewsScraper):
 
         find_relative = re.search(r'.*[0-9]{14}[/]*(.*)', url)
         return find_relative.group(1)
+
+    def get_collection_data(self, headline_elem):
+        if not headline_elem:
+            return # 20131011160326, weird special headline
+
+        headline = remove_clutter(headline_elem.find('a').get('title') if headline_elem.find('a') else headline_elem.find('span').get_text())
+        if headline in ['Novo site', 'Série Mar', 'Balanço 2012', 'Réveillon', 'Que valores para 2013', 'Escolhas para 2013',
+                        'O homem e o seu espaço', 'Revista 2', 'Páscoa', 'Legado de Vítor Gaspar', 'Portugueses com certeza',
+                        'Entrevista', 'Ano Grande do Brasil', 'Especial Praxe', 'Tudo Menos Economia', 'Os dias do calor',
+                        'Série especial', 'Uma Família à Mesa', 'Especial vinhos', 'Fugas', 'Especial Natal 2014',
+                        'Especial 2014', 'Vote nos Óscares', '25 anos Público', 'Vinhos de Portugal no Rio',
+                        'A prova dos factos', 'Prova dos factos', 'Prova dos Factos', 'Vamos pôr o Sequeira no lugar certo',
+                        'Especial multimédia', 'Especial 2015']:
+            return
+
+        if not headline:
+            return  # stuff like revista 2
+
+        # choose category based on headline
+        headline_img = headline_elem.find('img')
+        if headline_img:
+            # find headline imgs
+            if headline_img.get('src').endswith('autarquicas2013/img/cabeca_autarquicas.png'):
+                category = 'Política'
+                headline = 'Autárquicas 2013'
+            elif headline_img.get('src').endswith('florestaemperigo/img/cabeca_floresta.png'):
+                category = 'Ambiente'
+                headline = 'Floresta em Perigo'
+            else:
+                return  # all others img headlines unaccepted
+        else:
+            category = self.get_category_collection(headline)
+
+        # fix a typo
+        if headline in ['Tres anos de troika', 'Três anos de troika']:
+            category = 'Economia'
+            headline = 'Três anos de troika'
+
+        return category, headline
+
+    def get_category_collection(self, headline):
+        if headline in ['Quentin Tarantino', 'Festival de Veneza', 'Cinema', 'Lou Reed (1942-2013)', 'A hora do cante',
+                        'Os melhores do ano', 'Manoel de Oliveira 1908 - 2015', 'IndieLisboa', 'Festival de Cannes',
+                        'DocLisboa']:
+            return 'Cultura'
+
+        if headline in ['Estreia', 'Óscares 2013', 'Rock in Rio', 'Lauren Bacall', 'Óscares', 'NOS Primavera Sound',
+                        'Especial Guerra das Estrelas']:
+            return 'Entretenimento'
+
+        if headline in ['Mercado de Inverno', 'Desporto', 'Planisférico', 'Mercado de transferências',
+                        'Liga dos Campeões', 'PLANISFÉRICO', 'Mundial 2014', 'Final da Champions', 'I Liga', 'Liga Europa',
+                        'Cristiano Ronaldo', 'Benfica campeão', 'Corrupção na FIFA', 'Jorge Jesus no Sporting',
+                        'Dança de treinadores', 'Futebol']:
+            return 'Desporto'
+
+        if headline in ['Caso Bárcenas', 'A guerra na Síria', 'Síria', 'Eleições na Alemanha', 'Ofensiva em Gaza',
+                        'Referendo na Escócia', 'Eleições no Brasil', 'Eleições nos EUA', 'EUA/Cuba', 'Terror em França',
+                        'Eleições na Grécia', 'Grécia', 'Europa', 'Cimeira das Américas', 'Tragédia no Mediterrâneo',
+                        'Tragédia no Nepal', 'Refugiados', 'Eleições em Espanha']:
+            return 'Mundo'
+
+        if headline in ['Acesso ao Ensino Superior', 'o Estado da educação', 'Ranking das Escolas', 'Prova de professores',
+                        'Especial Mestrados', 'Exames nacionais', 'Ranking das Escolas 2015']:
+            return 'Educação'
+
+        if headline in ['Floresta em Perigo', 'Alterações climáticas', 'Cimeira do clima', 'Cimeira do Clima']:
+            return 'Ambiente'
+
+        if headline in ['25 de Abril', 'Especial I Guerra Mundial', 'O muro caiu há 25 anos', 'Mário Soares: 90 anos',
+                        '70 anos de Auschwitz', 'Lista VIP no Fisco', 'Caso Lista VIP']:
+            return 'Sociedade'
+
+        if headline in ['Eleições europeias', 'Eleições Europeias', 'Europeias', 'Crise no PS', 'Primárias PS',
+                        'Primárias no PS', 'Orçamento do Estado', 'Orçamento do Estado 2015', 'Estratégia Orçamental',
+                        'Congresso do PS', 'Congresso PS', 'Eleições na Madeira', 'Legislativas 2015', 'Nova legislatura',
+                        'Novo Governo', 'Novo governo', 'Crise política', 'Entrevista a António Costa', 'Debate do programa do Governo']:
+            return 'Política'
+
+        if headline in ['Resultados da banca', 'Crise no BES', 'O colapso do BES', 'Colapso do BES', 'Portugal: Objectivo crescimento',
+                        'Caso BES', 'A queda de um banqueiro', 'Caso Bes', 'Caso BES/PT', 'Política monetária', 'Relatório do FMI',
+                        'Programa económico do PS', 'Venda do Banif']:
+            return 'Economia'
+
+        if headline in ['Epidemia do ébola', 'Epidemia de ébola']:
+            return 'Saúde'
+
+        if headline in ['Operação Labirinto', 'Operação Marquês', 'Casos BES e submarinos', 'Segurança Social']:
+            return 'Portugal'
+
+        return 'Destaque'

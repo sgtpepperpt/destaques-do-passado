@@ -105,17 +105,16 @@ class ScraperGoogleNews02(NewsScraper):
 
 class ScraperGoogleNews03(NewsScraper):
     source = 'news.google.pt'
-    cutoff = 20131107170219  # we only tested up to here
+    cutoff = 20151231180214  # we only tested up to here
 
     def scrape_page(self, soup):
         all_news = []
 
-        stories = soup.find_all('td', class_='esc-layout-article-cell')
+        stories = soup.find_all('table', class_='esc-layout-table')
         for story in stories:
             url = story.find('h2', class_='esc-lead-article-title').find('a').get('href')
             if not is_link_pt(url):
-                # print('ignored ' + link.get('href'))
-                continue
+                continue  # avoid brazilian sources
 
             title = story.find('span', class_='titletext').get_text()
             if not title or ignore_title(title):
@@ -128,14 +127,76 @@ class ScraperGoogleNews03(NewsScraper):
             source = (story.find_next('span', class_='esc-lead-article-source') or story.find_next('span', class_='al-attribution-source')).get_text()  # handle two different versions
             snippet = story.find_next('div', class_='esc-lead-snippet-wrapper').get_text()
 
-            news = {
+            img_elem = story.find('img', class_='esc-thumbnail-image')
+            img_url = img_elem.get('src') if img_elem else None
+
+            all_news.append({
                 'article_url': url,
                 'title': remove_clutter(title),
                 'source': source,
                 'snippet': prettify_text(snippet),
+                'img_url': img_url,
                 'category': category,
                 'importance': Importance.LARGE
-            }
+            })
 
-            all_news.append(news)
+            # related is basically the same news rewritten...
+            # # RELATED ARTICLES
+            # related_articles = story.find_all('div', class_='esc-secondary-article-title-wrapper')
+            # for article in related_articles:
+            #     url = article.find('a').get('href')
+            #     title = article.find('span', class_='titletext').get_text()
+            #     source = article.find('label', class_='esc-secondary-article-source').get_text()
+            #
+            #     all_news.append({
+            #         'article_url': url,
+            #         'title': remove_clutter(title),
+            #         'source': source,
+            #         'category': category,
+            #         'importance': Importance.RELATED
+            #     })
+            #
+            # # MORE RELATED
+            # diversity_articles = story.find_all('div', class_='esc-diversity-article-wrapper')
+            # for article in diversity_articles:
+            #     url = article.find('a').get('href')
+            #     title = article.find('span', class_='titletext').get_text()
+            #     source = article.find('label', class_='esc-diversity-article-source').get_text()
+            #
+            #     all_news.append({
+            #         'article_url': url,
+            #         'title': remove_clutter(title),
+            #         'source': source,
+            #         'category': category,
+            #         'importance': Importance.RELATED
+            #     })
+
+        # LATEST NEWS
+        latest_elem = soup.find('div', id='s_BREAKING_NEWS_BOX')
+        if latest_elem:
+            self.scrape_side_news(all_news, latest_elem, Importance.LATEST)
+
+        # POPULAR NEWS
+        popular_elem = soup.find('div', id='s_POPULAR') or soup.find('div', id='s_MOST_POPULAR')
+        if popular_elem:
+            self.scrape_side_news(all_news, popular_elem, Importance.SMALL)
+
         return all_news
+
+    def scrape_side_news(self, all_news, elem, importance):
+        for story in elem.find_all('div', class_='story'):
+            url = story.find('a').get('href')
+
+            if not is_link_pt(url):
+                continue  # avoid brazilian sources
+
+            title = story.find('span', class_='titletext').get_text()
+            source = story.find('div', class_='source').find('span', class_='source-pref').get_text()
+
+            all_news.append({
+                'article_url': url,
+                'title': remove_clutter(title),
+                'source': source,
+                'category': 'Outras',
+                'importance': importance
+            })

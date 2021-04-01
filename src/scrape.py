@@ -9,11 +9,12 @@ from src.scrapers.expresso_scrapers import ScraperExpresso01, ScraperExpresso02,
     ScraperExpresso05, ScraperExpresso06, ScraperExpresso07, ScraperExpresso08, ScraperExpresso09, ScraperExpresso10, \
     ScraperExpresso11, ScraperExpresso12, ScraperExpresso13, ScraperExpresso14, ScraperExpresso15, ScraperExpresso16, \
     ScraperExpresso17, ScraperExpresso18, ScraperExpresso19, ScraperExpresso21, ScraperExpresso20, ScraperExpresso23, \
-    ScraperExpresso22, ScraperExpresso24, ScraperExpresso25, ScraperExpresso26, ScraperExpresso27, ScraperExpresso28
+    ScraperExpresso22, ScraperExpresso24, ScraperExpresso25, ScraperExpresso26, ScraperExpresso27, ScraperExpresso28, \
+    ScraperExpresso29, ScraperExpresso30
 from src.scrapers.google_news_scrapers import *
 from src.scrapers.jornaldenoticias_scrapers import ScraperJornalDeNoticias01, ScraperJornalDeNoticias02, \
     ScraperJornalDeNoticias03, ScraperJornalDeNoticias04, ScraperJornalDeNoticias05, ScraperJornalDeNoticias06, \
-    ScraperJornalDeNoticias07, ScraperJornalDeNoticias08, ScraperJornalDeNoticias09
+    ScraperJornalDeNoticias07, ScraperJornalDeNoticias08, ScraperJornalDeNoticias09, ScraperJornalDeNoticias10
 from src.scrapers.news_scraper import ScraperCentral
 from src.scrapers.portugaldiario_scrapers import ScraperPortugalDiario01, ScraperPortugalDiario02, \
     ScraperPortugalDiario03, ScraperPortugalDiario04, ScraperPortugalDiario05, ScraperPortugalDiario06
@@ -82,7 +83,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         actual_url = elems[2].replace('*', ':') if len(elems) > 2 else None
 
         # TODO dev only
-        # if int(date) < 20120701230207:
+        # if int(date) < 20150517000405:
         #     continue
 
         with open(file) as f:
@@ -176,6 +177,7 @@ def main():
     scraper.register_scraper(ScraperJornalDeNoticias07)
     scraper.register_scraper(ScraperJornalDeNoticias08)
     scraper.register_scraper(ScraperJornalDeNoticias09)
+    scraper.register_scraper(ScraperJornalDeNoticias10)
     scraper.register_scraper(ScraperExpresso01)
     scraper.register_scraper(ScraperExpresso02)
     scraper.register_scraper(ScraperExpresso03)
@@ -204,6 +206,8 @@ def main():
     scraper.register_scraper(ScraperExpresso26)
     scraper.register_scraper(ScraperExpresso27)
     scraper.register_scraper(ScraperExpresso28)
+    scraper.register_scraper(ScraperExpresso29)
+    scraper.register_scraper(ScraperExpresso30)
 
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
