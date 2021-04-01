@@ -865,12 +865,14 @@ class ScraperPublico08(NewsScraper):
     def get_latest_articles(self, latest_elem):
         for title_elem in [e.find('a') for e in latest_elem.find_all('li')]:
             # content of a, but excluding time tag
-            title = ' '.join(
-                [e for e in title_elem.contents if isinstance(e, NavigableString) and not isinstance(e, Comment)])
+            title = remove_clutter(title_elem.get_text())
+            groups = re.search(r'[0-2][0-9]:[0-5][0-9] (.*)', title)
+            if groups:
+                title = groups.group(1)
 
             self.all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title),
+                'title': title,
                 'category': 'Destaque',
                 'importance': Importance.LATEST
             })

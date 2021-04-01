@@ -56,6 +56,9 @@ def prettify_text(text):
     if groups:
         text = groups.group(1)
 
+    if text.startswith('PDiário:'):
+        text = text.replace('PDiário:', '')
+
     # remove doubled spaces
     text = clean_spacing(text)
 
@@ -68,9 +71,10 @@ def prettify_text(text):
 
 
 def ignore_title(title):
+    allows = ['Sorteio da Liga', 'Sorteio dos quartos', 'Sorteio da Superliga']
     starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
               'Vídeo:', 'Público lança', 'Público vence', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
-              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog', 'Home ', 'CR7 exclusivo em', 'http',
+              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog ', 'Home ', 'CR7 exclusivo em', 'http',
               'Mudança na publicação de comentários online', 'Quiosque:', 'Comente', 'Euromilhões', 'Vote', 'Opinião:',
               'Nota editorial', 'Faça aqui', 'Expresso nos', 'Já pensou onde ir', 'Top 10', 'Conheça as novidades do site',
               'Justiça seja feita', 'Revista \'Lui\' tira a roupa']
@@ -81,7 +85,7 @@ def ignore_title(title):
     contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso', 'para a casa ir abaixo',
                 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso', 'A primeira página do', 'a Revista E']
     for forbidden in contains:
-        if forbidden.lower() in title.lower():
+        if forbidden.lower() in title.lower() and forbidden.lower() not in allows:
             return True
 
     # ignore if the title starts with a date/time

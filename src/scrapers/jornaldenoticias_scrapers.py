@@ -1982,10 +1982,13 @@ class ScraperJornalDeNoticias09(NewsScraper):
                 continue
 
             title_elem = elem.find_all('h1')[-1].find('a')
-
-            snippet = get_snippet_navigable_strings(elem)
-            if not snippet:  # eventually a div appears
-                snippet = elem.find('div', class_='destaque-common-summary').get_text()
+            same_depth_nav = [e for e in title_elem.find_parent('div').contents if isinstance(e, NavigableString)]
+            if same_depth_nav:
+                snippet = ' '.join(same_depth_nav)
+            else:
+                snippet = get_snippet_navigable_strings(elem)
+                if not snippet:  # eventually a div appears
+                    snippet = elem.find('div', class_='destaque-common-summary').get_text()
 
             all_news.append({
                 'article_url': title_elem.get('href'),

@@ -1140,8 +1140,13 @@ class ScraperExpresso28(NewsScraper):
             # RELATED ARTICLES
             related_articles = article_elem.find_all(re.compile(r'td|span'), class_='related')
             for title_elem in [e.find('a') for e in related_articles]:
-                match = re.match(r'(.*) (\.\.\.) \[[0-9]*]', title_elem.get_text())
-                title = match.group(1) + match.group(2) if match else title_elem.get_text()
+                # remove nr of comments, keep ellipsis if existing
+                match = re.match(r'(.*)\s*\[[0-9]*]', title_elem.get_text())
+                if match:
+                    title = match.group(1).strip()
+                else:
+                    title = title_elem.get_text()
+
                 all_news.append({
                     'article_url': title_elem.get('href'),
                     'title': remove_clutter(title),
@@ -1152,9 +1157,13 @@ class ScraperExpresso28(NewsScraper):
         # LATEST NEWS
         latest_elems = soup.find('div', id='lusaHP').find_all('div', class_='item')
         for title_elem in [e.find('a') for e in latest_elems]:
+            title = remove_clutter(title_elem.get_text())
+            if not title:
+                continue
+
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
+                'title': title,
                 'category': 'Outras',
                 'importance': Importance.LATEST
             })
@@ -1181,6 +1190,10 @@ class ScraperExpresso29(NewsScraper):
 
             title_elem = article_elem.find('h2', class_=re.compile(r'bigTitle|smallTitle')).find('a')
             title = remove_clutter(title_elem.get_text())
+
+            if not title:
+                continue  # 20150101180206, a title is missing
+
             if ignore_title(title):
                 continue
 

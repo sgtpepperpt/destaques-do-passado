@@ -141,13 +141,16 @@ def process_categories(all_news, all_lines):
             continue
 
         elem = line.find('a', class_='dozeab') or line.find('a', class_='onzeab')
-        title = elem.get_text()
+        title = remove_clutter(elem.get_text())
+        if not title:
+            continue  # 20050206061731 has an empty title
+
         if ignore_title(title):
             continue
 
         all_news.append({
             'article_url': check_url(elem.get('href')),
-            'title': remove_clutter(title),
+            'title': title,
             'category': category,
             'importance': Importance.SMALL
         })
@@ -280,9 +283,13 @@ class ScraperPortugalDiario05(NewsScraper):
         # get feature's related
         related = featured_elem.find('div', id='rel').find_all('a', class_='lrec')
         for article in related:
+            title = remove_clutter(article.get_text())
+            if not title:
+                continue  # 20050607002151 has an empty title
+
             all_news.append({
                 'article_url': article.get('href'),
-                'title': remove_clutter(article.get_text()),
+                'title': title,
                 'category': 'Outras',
                 'importance': Importance.RELATED
             })
