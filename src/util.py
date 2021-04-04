@@ -12,7 +12,9 @@ def remove_clutter(text):
     if not text:
         return
 
-    clutter = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)', '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', 'PORTUGAL:', '(COM TRAILER)', 'EXCLUSIVO:', '(galeria de fotos)']
+    clutter = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)',
+               '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', '(VÍDEO)', 'PORTUGAL:', '(COM TRAILER)',
+               'EXCLUSIVO:', '(galeria de fotos)', '(com fotogaleria)', '(ouve-o aqui)']
     for elem in clutter:
         text = text.replace(elem, '')
 
@@ -38,9 +40,12 @@ def prettify_text(text):
         return text
 
     # remove ...
-    if text[-3:] == '...':
+    if text[-4:] == '....':
         had_ellipsis = True
         text = text[:-4].strip()
+    elif text[-3:] == '...':
+        had_ellipsis = True
+        text = text[:-3].strip()
 
     # remove period
     if text[-1] == '.':
@@ -75,15 +80,17 @@ def ignore_title(title):
     starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
               'Vídeo:', 'Público lança', 'Público vence', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
               'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog ', 'Home ', 'CR7 exclusivo em', 'http',
-              'Mudança na publicação de comentários online', 'Quiosque:', 'Comente', 'Euromilhões', 'Vote', 'Opinião:',
+              'Mudança na publicação de comentários online', 'Quiosque:', 'Comente ', 'Euromilhões', 'Vote', 'Opinião:',
               'Nota editorial', 'Faça aqui', 'Expresso nos', 'Já pensou onde ir', 'Top 10', 'Conheça as novidades do site',
-              'Justiça seja feita', 'Revista \'Lui\' tira a roupa']
+              'Justiça seja feita', 'Revista \'Lui\' tira a roupa', 'Veja', 'Editorial', 'Sudoku (',
+              'As melhores fotografias', 'Esta é a fotografia']
     for forbidden in starts:
         if title.lower().startswith(forbidden.lower()):
             return True
 
     contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso', 'para a casa ir abaixo',
-                'Expresso Diário', 'dicas para', 'A 1ª página do Expresso', 'A primeira página do', 'a Revista E']
+                'Expresso Diário', 'dicas para', 'A 1ª página do Expresso', 'A primeira página do', 'a Revista E',
+                'A grande revista sobre o Benfica campeão']
     for forbidden in contains:
         if forbidden.lower() in title.lower() and forbidden.lower() not in allows:
             return True
@@ -93,6 +100,10 @@ def ignore_title(title):
         return True
 
     return False
+
+
+def ignore_pretitle(pretitle):
+    return pretitle == 'Grátis'
 
 
 def is_link_pt(link):
@@ -109,7 +120,7 @@ def get_original_news_url(url):
     if url.startswith('no-article-url'):
         return url
 
-    groups = re.search(r'https://arquivo\.pt/(?:noFrame/replay|wayback)/[0-9]*(?:oe_)?/(.*)', url)
+    groups = re.search(r'https://arquivo\.pt/(?:noFrame/replay|wayback)/[0-9]*(?:oe_|mp_|im_)?/(.*)', url)
     return groups.group(1)
 
 
@@ -134,6 +145,10 @@ def make_absolute(source, timestamp, is_https, url):
         # eg '//arquivo.pt/noFrame/replay/20151231180213///www.publico.pt/economia/noticia/pensoes-ate-6288-euros-aumentam-04-a-partir-de-1-de-janeiro-1718873'
         url = 'https' + url
         url = url.replace('///', '/')
+
+    if url.startswith('/') and url.count('/') == 1:
+        url = url[1:]  # the regex didn't recognise the slash as being the last one, instead using up the first one;
+                       # don't want to change it because it could affect everything else previously, only affects dn.pt 10/2015
 
     possible = r'(https://arquivo\.pt)?(/)?(noFrame/replay|wayback)?(/)?([0-9]{14})?(?:im_|oe_|mp_)?(/)?(https?://[^/]*)?(/)?(.*)?'
     match = re.findall(possible, url)
@@ -163,8 +178,11 @@ def make_absolute(source, timestamp, is_https, url):
     if not match[0][7]:
         final += '/'
 
-    if not match[0][8]:
-        raise Exception('Error in absolute url')  # shouldn't be error if some urls have no path, just domain, like leitor.expresso.pt (we ignore those bus it SHOULD be valid if we didn't)
+    if 'www.dn.pt//' in url or 'www.dn.pt//' in final:
+        print()
+
+    # if not match[0][8]:
+    #     raise Exception('Error in absolute url')  # shouldn't be error if some urls have no path, just domain, like leitor.expresso.pt (we ignore those bus it SHOULD be valid if we didn't)
 
     return final + url
 
@@ -208,3 +226,12 @@ def find_comments(parent, content):
 
 def find_comments_regex(parent, content):
     return parent.find_all(string=lambda text: isinstance(text, Comment) and re.match(content, text))
+
+
+def encode_url(url):
+    # encode url to save as filename
+    return url.replace(':', '*').replace('/', '|').replace('-', '$')
+
+
+def decode_url(url):
+    return url.replace('*', ':').replace('|', '/').replace('$', '-')

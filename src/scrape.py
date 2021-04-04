@@ -5,6 +5,9 @@ import sqlite3
 import requests
 
 from src.categories import bind_category
+from src.scrapers.diariodenoticias_scrapers import ScraperDiarioDeNoticias01, ScraperDiarioDeNoticias02, \
+    ScraperDiarioDeNoticias03, ScraperDiarioDeNoticias04, ScraperDiarioDeNoticias05, ScraperDiarioDeNoticias06, \
+    ScraperDiarioDeNoticias07
 from src.scrapers.expresso_scrapers import ScraperExpresso01, ScraperExpresso02, ScraperExpresso03, ScraperExpresso04, \
     ScraperExpresso05, ScraperExpresso06, ScraperExpresso07, ScraperExpresso08, ScraperExpresso09, ScraperExpresso10, \
     ScraperExpresso11, ScraperExpresso12, ScraperExpresso13, ScraperExpresso14, ScraperExpresso15, ScraperExpresso16, \
@@ -80,10 +83,10 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         elems = filename.split('-')
         date = elems[0]
         is_https = elems[1] == 's'
-        actual_url = elems[2].replace('*', ':') if len(elems) > 2 else None
+        actual_url = decode_url(elems[2]) if len(elems) > 2 else None
 
         # TODO dev only
-        # if int(date) < 20150517000405:
+        # if int(date) < 20120105160234:
         #     continue
 
         with open(file) as f:
@@ -122,9 +125,18 @@ def scrape_source(scraper, source, cursor, db_insert=True):
             # convert noFrame url to wayback (with sidebar) for UI purposes
             article_url = article_url.replace('noFrame/replay', 'wayback')
 
-            # TODO do snippet, title, headline cleanups here
+            #  title, pretitle and snippet cleanups
+            title = remove_clutter(n['title'])
+            if ignore_title(title):
+                continue
 
-            print(n)
+            pretitle = remove_clutter(n.get('headline'))
+            if ignore_pretitle(pretitle):
+                continue
+
+            snippet = prettify_text(n.get('snippet'))
+
+            print('{}; {}; {} / {} {} / {}; {}'.format(title, pretitle, snippet, category, article_source, article_url, n.get('img_url')))
 
             # add article to DB
             if not db_insert:
@@ -140,7 +152,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
             # ignores already-inserted news (article url is unique for each article)
             # assumes sequencial insertion to preserver only earliest occurence of the article
             cursor.execute('''INSERT OR IGNORE INTO articles(original_article_url, article_url,arquivo_source_url,title,source,day,month,year,category,importance,headline,snippet,img_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-                           (original_article_url, article_url, arquivo_source_url, n['title'], article_source, timestamp[6:8], timestamp[4:6], timestamp[:4], category, n.get('importance'), n.get('headline'), n.get('snippet'), img_url))
+                           (original_article_url, article_url, arquivo_source_url, title, article_source, timestamp[6:8], timestamp[4:6], timestamp[:4], category, n.get('importance'), pretitle, snippet, img_url))
             cursor.connection.commit()
 
 
@@ -208,13 +220,21 @@ def main():
     scraper.register_scraper(ScraperExpresso28)
     scraper.register_scraper(ScraperExpresso29)
     scraper.register_scraper(ScraperExpresso30)
-
+    scraper.register_scraper(ScraperDiarioDeNoticias01)
+    scraper.register_scraper(ScraperDiarioDeNoticias02)
+    scraper.register_scraper(ScraperDiarioDeNoticias03)
+    scraper.register_scraper(ScraperDiarioDeNoticias04)
+    scraper.register_scraper(ScraperDiarioDeNoticias05)
+    scraper.register_scraper(ScraperDiarioDeNoticias06)
+    scraper.register_scraper(ScraperDiarioDeNoticias07)
+    # TODO https://arquivo.pt/wayback/20150911170211/http://news.google.pt/
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
     scrape_source(scraper, 'publico.pt', cursor)
     scrape_source(scraper, 'portugaldiario.iol.pt', cursor)
     scrape_source(scraper, 'jn.pt', cursor)
     scrape_source(scraper, 'expresso.pt', cursor)
+    scrape_source(scraper, 'dn.pt', cursor)
 
     # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)

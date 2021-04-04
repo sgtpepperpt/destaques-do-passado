@@ -71,7 +71,6 @@ def main():
     totals = []
     snippet = []
     img = []
-    categories_over_3 = []
     large_cats = []
     medium_cats = []
     small_cats = []
@@ -83,7 +82,6 @@ def main():
         totals.append(stats['total'])
         snippet.append(stats['snippets'])
         img.append(stats['imgs'])
-        categories_over_3.append(len([c for c in stats['categories'] if stats['categories'][c]['total'] > 3]))
         large_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['large'] >= 2 and stats['categories'][c]['total'] >= 6]))
         medium_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['large'] >= 1 and stats['categories'][c]['total'] >= 3]))
         small_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['total'] >= 4]))
@@ -103,7 +101,7 @@ def main():
                                     COALESCE(img_urls.redirect_url, articles.img_url) AS img_url,
                                     article_urls.status = 200 AS has_article_url,
                                     img_urls.status = 200 AS has_img_url
-                                FROM (SELECT * FROM articles WHERE day = ? AND month = ?)  AS articles
+                                FROM (SELECT * FROM articles WHERE day = ? AND month = ? ORDER BY year ASC)  AS articles
                                 LEFT OUTER JOIN urls AS article_urls ON articles.article_url = article_urls.url
                                 LEFT OUTER JOIN urls AS img_urls on articles.img_url = img_urls.url
                                 ''', (day, month)).fetchall()
@@ -121,7 +119,7 @@ def main():
                 'year': row[4],
                 'category': row[5],
                 'importance': row[6],
-                'headline': row[7],
+                'pretitle': row[7],
                 'snippet': row[8],
                 'img_url': row[9] if has_img_url else None,
                 'has_article_url': row[10]
@@ -135,7 +133,7 @@ def main():
             }))
     conn.close()
 
-    print('{} {} {} {} / {} {} {}'.format(min(totals), min(snippet), min(img), min(categories_over_3), min(large_cats), min(medium_cats), min(small_cats)))
+    print('{} {} {} / {} {} {}'.format(min(totals), min(snippet), min(img), min(large_cats), min(medium_cats), min(small_cats)))
 
 
 main()

@@ -23,23 +23,23 @@ class Category(Enum):
 
 category_bindings = {
     ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias', 'Destaque', 'Última hora', 'Outras', '1ª Página', 'Em foco', 'Foco', 'Última', 'Útimas notícias', 'Últimas',
-     'Actualidade'): Category.GENERIC,
-    ('Portugal', 'País'): Category.NATIONAL,
-    ('Mundo', 'Internacional', 'Europa', 'Enviados', 'África'): Category.WORLD,
-    ('Desporto', 'Esportes'): Category.SPORTS,
-    ('Negócios', 'Economia', 'Economia & Internacional', 'Dinheiro'): Category.BUSINESS,
-    ('Entretenimento', 'Música', 'Cinema', 'Palco', 'Televisão'): Category.ENTERTAINMENT,
+     'Actualidade', 'Destaques'): Category.GENERIC,
+    ('Portugal', 'País', 'Nacional'): Category.NATIONAL,
+    ('Mundo', 'Internacional', 'Europa', 'Enviados', 'África', 'Globo', 'Eleições em Espanha'): Category.WORLD,
+    ('Desporto', 'Esportes', 'Euro 2004', 'Euro2016'): Category.SPORTS,
+    ('Negócios', 'Economia', 'Economia & Internacional', 'Dinheiro', 'Dinheiro Vivo', 'Salário Mínimo', 'Caso Banif'): Category.BUSINESS,
+    ('Entretenimento', 'Música', 'Cinema', 'Palco', 'Televisão', 'Arte e média', 'Star Wars'): Category.ENTERTAINMENT,
     ('Ciência', 'Ciências', 'Ciencia'): Category.SCIENCE,
-    ('Saúde',): Category.HEALTH,
+    ('Saúde', 'Morte no Hospital de S. José'): Category.HEALTH,
     ('Política', 'Politica'): Category.POLITICS,
-    ('Cultura', 'Leituras', 'Cartaz'): Category.CULTURE,
-    ('Educação',): Category.EDUCATION,
-    ('Tecnologia', 'Ciência/tecnologia'): Category.TECHNOLOGY,
-    ('Sociedade', 'Grande Plano', 'Tema da semana', 'Polícia', 'Gente', 'Vidas', 'Vida', 'Fotogalerias', 'Dossiês', 'Dossiê', 'Alertas Expresso', 'Dossies Actualidade'): Category.SOCIETY,
-    ('Local', 'Local Lisboa', 'Grande Porto', 'Grande Lisboa', 'Grande Lsiboa', 'Porto 2001'): Category.LOCAL,
-    ('Ambiente', 'Ecosfera'): Category.ENVIRONMENT,
-    ('Opinião',): Category.OPINION,
-    ('Acredite se quiser', 'Esta é boca', 'Mundo Insólito'): Category.UNUSUAL
+    ('Cultura', 'Leituras', 'Cartaz', 'Artes'): Category.CULTURE,
+    ('Educação', 'Ranking das escolas'): Category.EDUCATION,
+    ('Tecnologia', 'Ciência/tecnologia', 'Ciência e tecnologia'): Category.TECHNOLOGY,
+    ('Sociedade', 'Grande Plano', 'Tema da semana', 'Polícia', 'Gente', 'Vidas', 'Vida', 'Fotogalerias', 'Dossiês', 'Dossiê', 'Alertas Expresso', 'Dossies Actualidade', 'Pessoas'): Category.SOCIETY,
+    ('Local', 'Local Lisboa', 'Grande Porto', 'Grande Lisboa', 'Grande Lsiboa', 'Porto 2001', 'Regional'): Category.LOCAL,
+    ('Ambiente', 'Ecosfera', 'DN + EDP na Cimeira do Clima', 'Cimeira do Clima'): Category.ENVIRONMENT,
+    ('Opinião', 'Análise'): Category.OPINION,
+    ('Acredite se quiser', 'Esta é boca', 'Mundo Insólito', 'Pausa para Café'): Category.UNUSUAL
 }
 
 

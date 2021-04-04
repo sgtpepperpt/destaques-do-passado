@@ -9,7 +9,7 @@ import pathlib
 
 from bs4 import BeautifulSoup
 
-from src.util import is_https_link, get_actual_source
+from src.util import is_https_link, get_actual_source, encode_url
 
 # pages can be ignored via timestamp or range of timestamps, eg if page didn't change in consecutive days or there was a page error
 # encoding can be defined like timestamps
@@ -54,6 +54,48 @@ news_sources = [
             '20070614005353', '20090628235239'
         ]
     },
+    {
+        'site': 'dn.pt',
+        'ignore': ['19971210080753-20011217081100',  # use the first alternative source
+                   '20011001070732-20011216025543',  # period where it redirects to lusomundo, which was only archived in 2005
+                   '20020117114627-20040618191302',  # use the second alternative source
+                   # redirected to sapo.pt
+                   '20041112090609', '20041113094530', '20041124092713', '20041126011101', '20050204095321', '20050206084348', '20050331091414',
+                   '20041126085901', '20050204233149', '20050206130903', '20050401090655', '20050419080718', '20050420085351', '20060705062020',
+                   '20060820071734', '20060825232258', '20060826050346', '20060826185341',
+
+                   # not found
+                   '20110121225541',
+
+                   # use the third alternative source
+                   '20110522215801-20151013180422'
+                   ]
+    },
+    {
+        # it's best to do as a separate source, because special would force the main page's timestamp
+        # onto a different page, and the capture dates for the special page might differ from the main's
+        'site': 'dn.pt',
+        'path': '/pri/sintpri.htm',
+        'from': '19971210080753',
+        'to': '20011001001039',  # after this and until 2002 it's the 30/09 edition repeated everytime
+        'target': 'dn.pt'  # store as if it was this one
+    },
+    {
+        'site': 'dn.sapo.pt',
+        'path': '/homepage/homepage.asp',
+        'from': '20020117114627',
+        'to': '20040618191302',
+        'target': 'dn.pt'  # store as if it was this one
+    },
+    {
+        'site': 'dn.pt',
+        'path': '/inicio/default.aspx',
+        'from': '20110522215801',
+        'to': '20151013180422',
+        'target': 'dn.pt',  # store as if it was this one
+        'ignore': ['20110621150217']
+    },
+    {'site': 'tsf.pt'},
     {'site': 'ultimahora.publico.pt'},
     {'site': 'sabado.pt'},
 
@@ -62,8 +104,6 @@ news_sources = [
     {'site': 'sicnoticias.sapo.pt'},
     {'site': 'diariodigital.pt'},
     {'site': 'rtp.pt'},
-    {'site': 'dn.pt'},
-    {'site': 'tsf.pt'},
     {'site': 'visao.sapo.pt'},
     {'site': 'sol.sapo.pt'},
     {'site': 'tvi24.iol.pt'},
@@ -147,8 +187,8 @@ def is_ignored(source, timestamp):
     if timestamp in source['ignore']:
         return True
 
-    ignore_intervals = [ignore for ignore in source['ignore'] if '-' in ignore]
-    for min, max in [interval.split('-') for interval in ignore_intervals]:
+    intervals = [ignore for ignore in source['ignore'] if '-' in ignore]
+    for min, max in [interval.split('-') for interval in intervals]:
         if min <= timestamp <= max:
             return True
 
@@ -171,12 +211,28 @@ def get_encoding(source, timestamp):
     return None
 
 
+def get_special(source, timestamp):
+    if 'special' not in source:
+        return None
+
+    if timestamp in source['special']:
+        return source['special'][timestamp]
+
+    intervals = [ignore for ignore in source['special'].keys() if '-' in ignore]
+    for key in intervals:
+        min, max = key.split('-')
+        if min <= timestamp <= max:
+            return source['special'][key]
+
+    return None
+
+
 def get_snapshot_list_cdx(source):
     params = {
         'output': 'json',
         'fields': 'url,timestamp',
         'filter': '!~status:4|5',
-        'url': source['site'],
+        'url': source['site'] + (source.get('path') or ''),
         'to': source.get('to') or '20151231235959'
     }
 
@@ -242,7 +298,7 @@ def get_page_content(url, encoding):
 
     actual_url_redirect = get_actual_source(r.url)  # source isn't always the same as expected, see 'jn.pt' vs 'jn.sapo.pt'
 
-    return r.content.decode(encoding, errors='replace'), actual_url_redirect.replace(':', '*')
+    return r.content.decode(encoding, errors='replace'), actual_url_redirect
 
 
 def get_page(url, encoding):
@@ -274,10 +330,10 @@ def get_page(url, encoding):
 
 
 def crawl_source(source, download=True):
-    print('Crawl ' + source['site'])
+    print('Crawl ' + source['site'] + (source.get('path') or ''))
 
-    img_dir = os.path.join('crawled', source['site'], 'screenshots')
-    page_dir = os.path.join('crawled', source['site'], 'pages')
+    img_dir = os.path.join('crawled', source.get('target') or source['site'], 'screenshots')
+    page_dir = os.path.join('crawled', source.get('target') or source['site'], 'pages')
 
     if download:
         pathlib.Path(img_dir).mkdir(parents=True, exist_ok=True)
@@ -303,24 +359,26 @@ def crawl_source(source, download=True):
             downloads += 1
             https = '-s' if is_https_link(snapshot['linkToArchive']) else '-p'
 
+            # use this if for some reason need to request a different link for a day
+            special_url = get_special(source, snapshot['tstamp'])
+
             # save screenshot and source code
             img = os.path.join(img_dir, snapshot['tstamp'] + https + '.png')
             if not os.path.exists(img):
                 snapshot_link = snapshot['linkToScreenshot']
-                if snapshot['tstamp'] in special_requests:  # use this if for some reason need to request a different link for a day
-                    snapshot_link += special_requests[snapshot['tstamp']]
+                if special_url:
+                    snapshot_link += special_url
 
                 r = requests.get(snapshot_link)
                 with open(img, 'wb') as f:
                     f.write(r.content)
 
-            page = os.path.join(page_dir, snapshot['tstamp'] + https + '*.html')
-
             # only download if no file starting by the current timestamp exists
+            page = os.path.join(page_dir, snapshot['tstamp'] + https + '*.html')  # '*' for glob only
             if len(glob(page)) == 0:
                 link = snapshot['linkToNoFrame']
-                if snapshot['tstamp'] in special_requests:  # use this if for some reason need to request a different link for a day
-                    link += special_requests[snapshot['tstamp']]
+                if special_url:
+                    link += special_url
 
                 # get page content
                 encoding = get_encoding(source, snapshot['tstamp'])
@@ -328,6 +386,7 @@ def crawl_source(source, download=True):
 
                 # get the actual url
                 if actual_url:
+                    actual_url = encode_url(actual_url + (source.get('path') or ''))
                     page = os.path.join(page_dir, snapshot['tstamp'] + https + '-' + actual_url + '.html')
                 else:
                     page = os.path.join(page_dir, snapshot['tstamp'] + https + '.html')
