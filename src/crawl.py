@@ -143,43 +143,6 @@ news_sources = [
 ]
 
 
-# def get_snapshot_list_api(source):
-#     params = {
-#         'versionHistory': source['site'],
-#         'to': source.get('to') or '20131231235959',
-#         'maxItems': 200
-#     }
-#
-#     if 'from' in source:
-#         params['from'] = source['from']
-#
-#     r = requests.get('https://arquivo.pt/textsearch', params)
-#     data = r.json()
-#
-#     if 'response_items' not in data or len(data['response_items']) == 0:
-#         print('\tNo results')
-#         return
-#
-#     dates = set()
-#     snapshots = []
-#     while 'response_items' in data and len(data['response_items']) > 0:
-#         for item in data['response_items']:
-#             # if this day in history was already crawled continue (1 snapshot per day only)
-#             if item['tstamp'][:8] in dates:
-#                 continue
-#             dates.add(item['tstamp'][:8])
-#
-#             snapshots.append({
-#                 'tstamp': item['tstamp'],
-#                 'linkToArchive': item['linkToArchive'],
-#                 'linkToNoFrame': item['linkToNoFrame'],
-#                 'linkToScreenshot': item['linkToScreenshot']
-#             })
-#
-#         data = requests.get(data['next_page']).json()
-#
-#     return snapshots
-
 def is_ignored(source, timestamp):
     if 'ignore' not in source:
         return False
@@ -345,8 +308,6 @@ def crawl_source(source, download=True):
     if len(snapshots) == 0:
         print('\tNo results')
         return
-
-    special_requests = source.get('special') or {}
 
     downloads = 0
 

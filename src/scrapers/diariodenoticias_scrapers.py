@@ -1208,7 +1208,7 @@ class ScraperDiarioDeNoticias05(NewsScraper):
                 continue
 
             pretitle_elem = article_elem.find('span', class_='arial_10_cinzaclaro')
-            pretitle = pretitle_elem.get_text() if pretitle_elem else None
+            pretitle = pretitle_elem.get_text().title() if pretitle_elem else None
 
             title_elem = article_elem.find('span', class_='arial_azul_escuro_b')
             snippet_elem = article_elem.find('span', class_='arial_noticias_cinza')

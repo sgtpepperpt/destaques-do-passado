@@ -227,7 +227,7 @@ def main():
     scraper.register_scraper(ScraperDiarioDeNoticias05)
     scraper.register_scraper(ScraperDiarioDeNoticias06)
     scraper.register_scraper(ScraperDiarioDeNoticias07)
-    # TODO https://arquivo.pt/wayback/20150911170211/http://news.google.pt/
+
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
     scrape_source(scraper, 'publico.pt', cursor)
