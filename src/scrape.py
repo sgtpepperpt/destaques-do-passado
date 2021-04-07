@@ -24,6 +24,7 @@ from src.scrapers.portugaldiario_scrapers import ScraperPortugalDiario01, Scrape
 from src.scrapers.publico_scrapers import ScraperPublico01, ScraperPublico02, ScraperPublico03, ScraperPublico04, \
     ScraperPublico05, ScraperPublico06, ScraperPublico07, ScraperPublico08
 from src.sources import bind_source, source_name_from_file
+from src.text_util import remove_clutter, prettify_text, ignore_title, ignore_pretitle
 from src.util import *
 
 

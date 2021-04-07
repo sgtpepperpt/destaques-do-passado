@@ -1,6 +1,7 @@
 import re
 
-from src.util import prettify_text, is_link_pt, clean_special_chars, ignore_title, remove_clutter
+from src.util import is_link_pt
+from src.text_util import remove_clutter, clean_special_chars, prettify_text, ignore_title
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 

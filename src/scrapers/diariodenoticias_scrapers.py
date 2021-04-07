@@ -2,8 +2,8 @@ import re
 
 from bs4 import NavigableString, Comment
 
-from src.util import prettify_text, is_link_pt, clean_special_chars, ignore_title, remove_clutter, generate_dummy_url, \
-    find_comments
+from src.util import generate_dummy_url, find_comments
+from src.text_util import remove_clutter, clean_special_chars, prettify_text
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
