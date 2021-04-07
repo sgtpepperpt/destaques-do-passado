@@ -5,9 +5,13 @@ import sqlite3
 import requests
 
 from src.categories import bind_category
-from src.scrapers.diariodenoticias_scrapers import ScraperDiarioDeNoticias01, ScraperDiarioDeNoticias02, \
-    ScraperDiarioDeNoticias03, ScraperDiarioDeNoticias04, ScraperDiarioDeNoticias05, ScraperDiarioDeNoticias06, \
-    ScraperDiarioDeNoticias07
+
+from src.scrapers.diariodenoticias_dummy import DummyDiarioDeNoticias01, DummyDiarioDeNoticias03
+from src.scrapers.jornaldenoticias_dummy import DummyJornalDeNoticias01, DummyJornalDeNoticias07
+from src.scrapers.publico_dummy import DummyPublico01
+
+from src.scrapers.diariodenoticias_scrapers import ScraperDiarioDeNoticias02, ScraperDiarioDeNoticias04, \
+    ScraperDiarioDeNoticias05, ScraperDiarioDeNoticias06, ScraperDiarioDeNoticias07
 from src.scrapers.expresso_scrapers import ScraperExpresso01, ScraperExpresso02, ScraperExpresso03, ScraperExpresso04, \
     ScraperExpresso05, ScraperExpresso06, ScraperExpresso07, ScraperExpresso08, ScraperExpresso09, ScraperExpresso10, \
     ScraperExpresso11, ScraperExpresso12, ScraperExpresso13, ScraperExpresso14, ScraperExpresso15, ScraperExpresso16, \
@@ -15,14 +19,16 @@ from src.scrapers.expresso_scrapers import ScraperExpresso01, ScraperExpresso02,
     ScraperExpresso22, ScraperExpresso24, ScraperExpresso25, ScraperExpresso26, ScraperExpresso27, ScraperExpresso28, \
     ScraperExpresso29, ScraperExpresso30
 from src.scrapers.google_news_scrapers import *
-from src.scrapers.jornaldenoticias_scrapers import ScraperJornalDeNoticias01, ScraperJornalDeNoticias02, \
-    ScraperJornalDeNoticias03, ScraperJornalDeNoticias04, ScraperJornalDeNoticias05, ScraperJornalDeNoticias06, \
-    ScraperJornalDeNoticias07, ScraperJornalDeNoticias08, ScraperJornalDeNoticias09, ScraperJornalDeNoticias10
-from src.scrapers.news_scraper import ScraperCentral
+from src.scrapers.jornaldenoticias_scrapers import ScraperJornalDeNoticias02, ScraperJornalDeNoticias03, \
+    ScraperJornalDeNoticias04, ScraperJornalDeNoticias05, ScraperJornalDeNoticias06, ScraperJornalDeNoticias08, \
+    ScraperJornalDeNoticias09, ScraperJornalDeNoticias10
 from src.scrapers.portugaldiario_scrapers import ScraperPortugalDiario01, ScraperPortugalDiario02, \
     ScraperPortugalDiario03, ScraperPortugalDiario04, ScraperPortugalDiario05, ScraperPortugalDiario06
-from src.scrapers.publico_scrapers import ScraperPublico01, ScraperPublico02, ScraperPublico03, ScraperPublico04, \
-    ScraperPublico05, ScraperPublico06, ScraperPublico07, ScraperPublico08
+from src.scrapers.publico_scrapers import ScraperPublico02, ScraperPublico03, ScraperPublico04, ScraperPublico05, \
+    ScraperPublico06, ScraperPublico07, ScraperPublico08
+
+
+from src.scrapers.news_scraper import ScraperCentral
 from src.sources import bind_source, source_name_from_file
 from src.text_util import remove_clutter, prettify_text, ignore_title, ignore_pretitle
 from src.util import *
@@ -167,7 +173,7 @@ def main():
     scraper.register_scraper(ScraperGoogleNews01)
     scraper.register_scraper(ScraperGoogleNews02)
     scraper.register_scraper(ScraperGoogleNews03)
-    scraper.register_scraper(ScraperPublico01)
+    scraper.register_scraper(DummyPublico01)
     scraper.register_scraper(ScraperPublico02)
     scraper.register_scraper(ScraperPublico03)
     scraper.register_scraper(ScraperPublico04)
@@ -181,13 +187,13 @@ def main():
     scraper.register_scraper(ScraperPortugalDiario04)
     scraper.register_scraper(ScraperPortugalDiario05)
     scraper.register_scraper(ScraperPortugalDiario06)
-    scraper.register_scraper(ScraperJornalDeNoticias01)
+    scraper.register_scraper(DummyJornalDeNoticias01)
     scraper.register_scraper(ScraperJornalDeNoticias02)
     scraper.register_scraper(ScraperJornalDeNoticias03)
     scraper.register_scraper(ScraperJornalDeNoticias04)
     scraper.register_scraper(ScraperJornalDeNoticias05)
     scraper.register_scraper(ScraperJornalDeNoticias06)
-    scraper.register_scraper(ScraperJornalDeNoticias07)
+    scraper.register_scraper(DummyJornalDeNoticias07)
     scraper.register_scraper(ScraperJornalDeNoticias08)
     scraper.register_scraper(ScraperJornalDeNoticias09)
     scraper.register_scraper(ScraperJornalDeNoticias10)
@@ -221,9 +227,9 @@ def main():
     scraper.register_scraper(ScraperExpresso28)
     scraper.register_scraper(ScraperExpresso29)
     scraper.register_scraper(ScraperExpresso30)
-    scraper.register_scraper(ScraperDiarioDeNoticias01)
+    scraper.register_scraper(DummyDiarioDeNoticias01)
     scraper.register_scraper(ScraperDiarioDeNoticias02)
-    scraper.register_scraper(ScraperDiarioDeNoticias03)
+    scraper.register_scraper(DummyDiarioDeNoticias03)
     scraper.register_scraper(ScraperDiarioDeNoticias04)
     scraper.register_scraper(ScraperDiarioDeNoticias05)
     scraper.register_scraper(ScraperDiarioDeNoticias06)
