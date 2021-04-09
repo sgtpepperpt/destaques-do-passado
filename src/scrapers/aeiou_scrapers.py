@@ -2,10 +2,19 @@ import re
 
 from bs4 import NavigableString, Comment, Tag
 
-from src.util import is_link_pt, find_comments, is_between, find_comments_regex, get_direct_strings
+from src.util import is_link_pt, find_comments, is_between, find_comments_regex, get_direct_strings, \
+    generate_destaques_uniqueness
 from src.text_util import remove_clutter, clean_special_chars, prettify_text, ignore_title
 
 from src.scrapers.news_scraper import NewsScraper, Importance
+
+
+def add_uniqueness_to_url(url, category, title, snippet):
+    # add uniqueness when there's a generic url
+    if url.endswith('tsf.pt') or url.endswith('relvado.aeiou.pt') or url.endswith('-do-pescoco-ao-cranio'):
+        return url + '/' + generate_destaques_uniqueness(category, title, snippet)
+    else:
+        return url
 
 
 def process_source(source):
@@ -171,8 +180,11 @@ def scrape_red_version(soup):
         # gets snippet and source
         snippet, source = get_snippet_elems(main_elem.contents)
 
+    # might need to add a disambiguation in some very rare cases
+    url = add_uniqueness_to_url(title_elem.get('href'), 'Genérico-AEIOU-redversion', title_elem.get_text(), snippet)
+
     all_news.append({
-        'article_url': title_elem.get('href'),
+        'article_url': url,
         'title': title_elem.get_text(),
         'snippet': snippet,
         'img_url': img_elem.get('src'),
@@ -488,8 +500,11 @@ class ScraperAeiou05(NewsScraper):
             source_elem = elem.find('a', class_='hl f11 b')
             source = source_elem.get_text() if source_elem else 'AEIOU'
 
+            # might need to add a disambiguation in some very rare cases
+            url = add_uniqueness_to_url(title_elem.get('href'), category + '-AEIOU-05', title_elem.get_text(), source)
+
             all_news.append({
-                'article_url': title_elem.get('href'),
+                'article_url': url,
                 'title': title_elem.get_text(),
                 'source': source,
                 'category': category,
@@ -550,8 +565,11 @@ class ScraperAeiou05(NewsScraper):
             # alter some categories and re-purpose them as pretitles
             category, pretitle = self.compress_categories(category)
 
+            # might need to add a disambiguation in some very rare cases
+            url = add_uniqueness_to_url(title_elem.get('href'), category + '-AEIOU-05', title_elem.get_text(), snippet)
+
             all_news.append({
-                'article_url': title_elem.get('href'),
+                'article_url': url,
                 'title': title_elem.get_text(),
                 'snippet': snippet,
                 'headline': pretitle,
@@ -601,8 +619,11 @@ class ScraperAeiou06(NewsScraper):
         if snippet == 'Chamadas em ':
             snippet = None
 
+        # might need to add a disambiguation in some very rare cases
+        url = add_uniqueness_to_url(article_elem.get('href'), category + '-AEIOU-06', title_elem.get_text(), snippet)
+
         all_news.append({
-            'article_url': article_elem.get('href'),
+            'article_url': url,
             'title': title_elem.get_text(),
             'img_url': img_elem.get('src') if img_elem else None,
             'snippet': snippet,

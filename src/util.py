@@ -84,6 +84,9 @@ def make_absolute(source, timestamp, is_https, url):
     # if not match[0][8]:
     #     raise Exception('Error in absolute url')  # shouldn't be error if some urls have no path, just domain, like leitor.expresso.pt (we ignore those bus it SHOULD be valid if we didn't)
 
+    if final.startswith('/'):
+        raise Exception
+
     return final + url
 
 
