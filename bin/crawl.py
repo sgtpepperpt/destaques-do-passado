@@ -3,6 +3,7 @@ import json
 import os
 from collections import Counter
 
+import re
 import chardet
 import requests
 import pathlib
@@ -95,12 +96,39 @@ news_sources = [
         'target': 'dn.pt',  # store as if it was this one
         'ignore': ['20110621150217']
     },
+    {
+        'site': 'aeiou.pt',
+        'from': 19990420195435,  # no news before
+        'ignore': [
+            '20010202085000-20010202141600',  # weird page
+
+            # alternate version contained in iframe
+            '20020327025158', '20020601110324', '20020602020939', '20020604020102', '20020724072703', '20020802120758', '20020926150515',
+            '20021120082141', '20021127043332', '20030208133441-20030422003232', '20030522224359-20030807213119', '20031001004649',
+
+            # empty
+            '20071217030135'
+        ]
+    },
+    {
+        'site': 'aeiou.pt',
+        'path': '/primeira/index.php',
+        'from': 20020327025158,
+        'to': 20031001043355,
+        'target': 'aeiou.pt'
+    },
+    {
+        'site': 'aeiou.pt',
+        'path': '/red/primeira/index.php',
+        'from': 20031001043355,
+        'to': 20070308030604,
+        'target': 'aeiou.pt'
+    },
     {'site': 'tsf.pt'},
     {'site': 'ultimahora.publico.pt'},
     {'site': 'sabado.pt'},
 
     {'site': 'iol.pt'},
-    {'site': 'aeiou.pt'},
     {'site': 'sicnoticias.sapo.pt'},
     {'site': 'diariodigital.pt'},
     {'site': 'rtp.pt'},
@@ -271,7 +299,7 @@ def get_page(url, encoding):
         soup = BeautifulSoup(content, features='html5lib')
 
         # follows meta refresh tags if existent, useful to get over interstitials
-        element = soup.find('meta', attrs={'http-equiv': 'refresh'})
+        element = soup.find('meta', attrs={'http-equiv': re.compile(r'R|refresh')})
         if element and element.get('content') and '=' in element.get('content'):
             if element.get('content').startswith('0'):
                 break

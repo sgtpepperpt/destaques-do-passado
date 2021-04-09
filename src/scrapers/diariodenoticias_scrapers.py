@@ -1,15 +1,9 @@
 import re
 
-from bs4 import NavigableString, Comment
-
-from src.util import generate_dummy_url, find_comments
+from src.util import generate_dummy_url, find_comments, get_direct_strings
 from src.text_util import remove_clutter, clean_special_chars, prettify_text
 
 from src.scrapers.news_scraper import NewsScraper, Importance
-
-
-def get_direct_strings(elem):
-    return remove_clutter(' '.join([e for e in elem.contents if isinstance(e, NavigableString) and not isinstance(e, Comment)]))
 
 
 class ScraperDiarioDeNoticias02(NewsScraper):

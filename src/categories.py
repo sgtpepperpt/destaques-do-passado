@@ -19,27 +19,35 @@ class Category(Enum):
     ENVIRONMENT = 'Ambiente'
     OPINION = 'Opinião'
     UNUSUAL = 'Insólito'
+    MISC = 'Outras'
 
 
 category_bindings = {
-    ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias', 'Destaque', 'Última hora', 'Outras', '1ª Página', 'Em foco', 'Foco', 'Última', 'Útimas notícias', 'Últimas',
-     'Actualidade', 'Destaques'): Category.GENERIC,
+    ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias',
+     'Destaque', 'Última hora', 'Outras', '1ª Página', 'Em foco', 'Foco', 'Última', 'Útimas notícias', 'Últimas',
+     'Actualidade', 'Destaques', 'Genérico', 'emfoco', 'Atualidade'): Category.GENERIC,
     ('Portugal', 'País', 'Nacional'): Category.NATIONAL,
     ('Mundo', 'Internacional', 'Europa', 'Enviados', 'África', 'Globo', 'Eleições em Espanha'): Category.WORLD,
-    ('Desporto', 'Esportes', 'Euro 2004', 'Euro2016'): Category.SPORTS,
-    ('Negócios', 'Economia', 'Economia & Internacional', 'Dinheiro', 'Dinheiro Vivo', 'Salário Mínimo', 'Caso Banif'): Category.BUSINESS,
-    ('Entretenimento', 'Música', 'Cinema', 'Palco', 'Televisão', 'Arte e média', 'Star Wars'): Category.ENTERTAINMENT,
-    ('Ciência', 'Ciências', 'Ciencia'): Category.SCIENCE,
-    ('Saúde', 'Morte no Hospital de S. José'): Category.HEALTH,
-    ('Política', 'Politica'): Category.POLITICS,
-    ('Cultura', 'Leituras', 'Cartaz', 'Artes'): Category.CULTURE,
-    ('Educação', 'Ranking das escolas'): Category.EDUCATION,
-    ('Tecnologia', 'Ciência/tecnologia', 'Ciência e tecnologia'): Category.TECHNOLOGY,
-    ('Sociedade', 'Grande Plano', 'Tema da semana', 'Polícia', 'Gente', 'Vidas', 'Vida', 'Fotogalerias', 'Dossiês', 'Dossiê', 'Alertas Expresso', 'Dossies Actualidade', 'Pessoas'): Category.SOCIETY,
-    ('Local', 'Local Lisboa', 'Grande Porto', 'Grande Lisboa', 'Grande Lsiboa', 'Porto 2001', 'Regional'): Category.LOCAL,
-    ('Ambiente', 'Ecosfera', 'DN + EDP na Cimeira do Clima', 'Cimeira do Clima'): Category.ENVIRONMENT,
-    ('Opinião', 'Análise'): Category.OPINION,
-    ('Acredite se quiser', 'Esta é boca', 'Mundo Insólito', 'Pausa para Café'): Category.UNUSUAL
+    ('Desporto', 'Esportes', 'Euro 2004', 'Euro2016', 'Resultados', 'Relvado', 'Futebol', 'Mundial2010', 'Mundial',
+     'Mundial 2010', 'Ténis', 'Euro 2012', 'Primeira Liga', 'Liga dos Campeões', 'Liga Europa'): Category.SPORTS,
+    ('Negócios', 'Economia', 'Economia & Internacional', 'Dinheiro', 'Dinheiro Vivo', 'Salário Mínimo', 'Caso Banif',
+     'negocios', 'Banca', 'Economa'): Category.BUSINESS,
+    ('Entretenimento', 'Música', 'Cinema', 'Palco', 'Televisão', 'Arte e média', 'Star Wars', 'Lazer', 'Festival',
+     'Jogos', 'Concertos', 'Espectáculos'): Category.ENTERTAINMENT,
+    ('Ciência', 'Ciências', 'Ciencia', 'Nobel', 'Espaço', 'Biologia', 'Ciência e Saúde'): Category.SCIENCE,
+    ('Saúde', 'Morte no Hospital de S. José', 'SNS', 'Vacinas'): Category.HEALTH,
+    ('Política', 'Politica', 'Partidos', 'Governo'): Category.POLITICS,
+    ('Cultura', 'Leituras', 'Cartaz', 'Artes', 'Arte', 'Literatura', 'Dança', 'Exposições', 'BD', 'Teatro'): Category.CULTURE,
+    ('Educação', 'Ranking das escolas', 'Ensino'): Category.EDUCATION,
+    ('Tecnologia', 'Ciência/tecnologia', 'Ciência e tecnologia', 'Internet', 'Computadores', 'Informática',
+     'Tecnologia e Ciência', 'Tecnolologia', 'Hardware'): Category.TECHNOLOGY,
+    ('Sociedade', 'Grande Plano', 'Tema da semana', 'Polícia', 'Gente', 'Vidas', 'Vida', 'Fotogalerias', 'Dossiês',
+     'Dossiê', 'Alertas Expresso', 'Dossies Actualidade', 'Pessoas', 'Religião', 'Moda'): Category.SOCIETY,
+    ('Local', 'Local Lisboa', 'Grande Porto', 'Grande Lisboa', 'Grande Lsiboa', 'Porto 2001', 'Regional', 'Lisboa'): Category.LOCAL,
+    ('Ambiente', 'Ecosfera', 'DN + EDP na Cimeira do Clima', 'Cimeira do Clima', 'Biodiversidade', 'Clima'): Category.ENVIRONMENT,
+    ('Opinião', 'Análise', 'Crónica'): Category.OPINION,
+    ('Acredite se quiser', 'Esta é boca', 'Mundo Insólito', 'Pausa para Café', 'Insólito'): Category.UNUSUAL,
+    ('Outras', 'Mais Lidas'): Category.MISC
 }
 
 

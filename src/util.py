@@ -1,7 +1,9 @@
 import hashlib
 import re
 
-from bs4 import Comment
+from bs4 import Comment, NavigableString
+
+from src.text_util import remove_clutter
 
 
 def is_link_pt(link):
@@ -124,6 +126,10 @@ def find_comments(parent, content):
 
 def find_comments_regex(parent, content):
     return parent.find_all(string=lambda text: isinstance(text, Comment) and re.match(content, text))
+
+
+def get_direct_strings(elem):
+    return remove_clutter(' '.join([e for e in elem.contents if isinstance(e, NavigableString) and not isinstance(e, Comment)]))
 
 
 def encode_url(url):

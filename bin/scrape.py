@@ -5,6 +5,8 @@ import sqlite3
 import requests
 
 from src.categories import bind_category
+from src.scrapers.aeiou_scrapers import ScraperAeiou01, ScraperAeiou02, ScraperAeiou03, ScraperAeiou04, ScraperAeiou05, \
+    ScraperAeiou06
 
 from src.scrapers.diariodenoticias_dummy import DummyDiarioDeNoticias01, DummyDiarioDeNoticias03
 from src.scrapers.jornaldenoticias_dummy import DummyJornalDeNoticias01, DummyJornalDeNoticias07
@@ -93,7 +95,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         actual_url = decode_url(elems[2]) if len(elems) > 2 else None
 
         # TODO dev only
-        # if int(date) < 20120105160234:
+        # if int(date) < 20120701150250:
         #     continue
 
         with open(file) as f:
@@ -234,6 +236,12 @@ def main():
     scraper.register_scraper(ScraperDiarioDeNoticias05)
     scraper.register_scraper(ScraperDiarioDeNoticias06)
     scraper.register_scraper(ScraperDiarioDeNoticias07)
+    scraper.register_scraper(ScraperAeiou01)
+    scraper.register_scraper(ScraperAeiou02)
+    scraper.register_scraper(ScraperAeiou03)
+    scraper.register_scraper(ScraperAeiou04)
+    scraper.register_scraper(ScraperAeiou05)
+    scraper.register_scraper(ScraperAeiou06)
 
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
@@ -242,6 +250,7 @@ def main():
     scrape_source(scraper, 'jn.pt', cursor)
     scrape_source(scraper, 'expresso.pt', cursor)
     scrape_source(scraper, 'dn.pt', cursor)
+    scrape_source(scraper, 'aeiou.pt', cursor)
 
     # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)

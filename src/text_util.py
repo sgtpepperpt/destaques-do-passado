@@ -15,8 +15,13 @@ def remove_clutter(text):
     for elem in clutter:
         text = text.replace(elem, '')
 
-    if text.startswith('•'):
+    if text.startswith('•') or text.startswith(',') or text.startswith(':'):
         text = text[1:]
+
+    # remove (actual.) (actual.I) (actual.II) etc
+    match_actual = re.match(r'(.*)\(actual\.I*\)$', text)
+    if match_actual:
+        text = match_actual.group(1)
 
     return clean_spacing(text)
 
@@ -67,6 +72,7 @@ def prettify_text(text):
     # remove doubled spaces
     text = clean_spacing(text)
 
+    # restore stuff
     if had_period:
         text += '.'
     elif had_ellipsis:
@@ -83,14 +89,15 @@ def ignore_title(title):
               'Mudança na publicação de comentários online', 'Quiosque:', 'Comente ', 'Euromilhões', 'Vote', 'Opinião:',
               'Nota editorial', 'Faça aqui', 'Expresso nos', 'Já pensou onde ir', 'Top 10', 'Conheça as novidades do site',
               'Justiça seja feita', 'Revista \'Lui\' tira a roupa', 'Veja', 'Editorial', 'Sudoku (',
-              'As melhores fotografias', 'Esta é a fotografia']
+              'As melhores fotografias', 'Esta é a fotografia', 'Conheça']
     for forbidden in starts:
         if title.lower().startswith(forbidden.lower()):
             return True
 
     contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso', 'para a casa ir abaixo',
                 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso', 'A primeira página do', 'a Revista E',
-                'A grande revista sobre o Benfica campeão']
+                'A grande revista sobre o Benfica campeão', 'notícias + lidas', 'Portal AEIOU', 'mulheres da vida de',
+                'adivinhe']
     for forbidden in contains:
         if forbidden.lower() in title.lower() and forbidden.lower() not in allows:
             return True

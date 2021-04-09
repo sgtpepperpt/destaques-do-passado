@@ -24,7 +24,8 @@ def source_name_from_file(source):
         'portugaldiario.iol.pt': 'Portugal Diário',
         'jn.pt': 'Jornal de Notícias',
         'expresso.pt': 'Expresso',
-        'dn.pt': 'Diário de Notícias'
+        'dn.pt': 'Diário de Notícias',
+        'aeiou.pt': 'AEIOU'
     }
 
     return sources[source]
