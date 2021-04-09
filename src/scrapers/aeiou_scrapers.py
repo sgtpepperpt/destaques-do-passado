@@ -467,7 +467,9 @@ class ScraperAeiou05(NewsScraper):
         # a big feature is not always present (20100602140130)
         if title:
             snippet = get_direct_strings(big_feature)
-            source = big_feature.find('a', class_='hl').get_text()
+
+            source_elem = big_feature.find('a', class_='hl f11 b')
+            source = source_elem.get_text() if source_elem else 'AEIOU'
 
             all_news.append({
                 'article_url': title_elem.get('href'),
@@ -483,7 +485,7 @@ class ScraperAeiou05(NewsScraper):
         for elem in small_features:
             title_elem = elem.find('a')
 
-            source_elem = elem.find('a', class_='hl')
+            source_elem = elem.find('a', class_='hl f11 b')
             source = source_elem.get_text() if source_elem else 'AEIOU'
 
             all_news.append({
@@ -588,6 +590,9 @@ class ScraperAeiou06(NewsScraper):
         if source_match:
             snippet = source_match.group(1)
             source = source_match.group(2)
+
+            if source in ['foto', 'VÍDEO']:
+                source = 'AEIOU'  # accidentally captured something not intended as source
 
         # ignore if encoding problems
         snippet = None if snippet.count('?') > 2 else snippet

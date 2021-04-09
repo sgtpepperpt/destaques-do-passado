@@ -2,7 +2,7 @@ def bind_source(source_text):
     if source_text in ['Público.pt (Assinatura', 'Público.pt']:
         return 'Público'
 
-    if source_text.startswith('Diário de Notícias'):
+    if source_text.startswith('Diário de Notícias') or source_text in ['DN']:  # google news has Diário de Notícias - Lisboa
         return 'Diário de Notícias'
 
     if source_text.startswith('Jornal de Negócios'):
@@ -11,8 +11,44 @@ def bind_source(source_text):
     if source_text.startswith('O Ribatejo | jornal regional'):
         return 'O Ribatejo'
 
-    if source_text.startswith('Revista BIT, Informática'):
+    if source_text.startswith('Revista BIT, Informática') or source_text in ['Revista Bit', 'http://www.bit.pt/feed/', 'B!T', 'Revista BiT', 'Bit']:
         return 'Revista BIT'
+
+    if source_text.startswith('Diário Economico'):
+        return 'Diário Económico'
+
+    if 'aeiou' in source_text.lower():
+        return 'AEIOU'
+
+    if source_text in ['Ionline']:
+        return 'iOnline'
+
+    if source_text in ['OJogo', 'O JOGO', 'o Jogo', 'O Jogo Online']:
+        return 'O Jogo'
+
+    if source_text in ['ABola']:
+        return 'A Bola'
+
+    if source_text in ['Exame Informatica']:
+        return 'Exame Informática'
+
+    if source_text in ['Ciberia']:
+        return 'Cibéria'
+
+    if source_text in ['JN']:
+        return 'Jornal de Notícias'
+
+    if source_text in ['quiosque']:
+        return 'Quiosque'
+
+    if source_text in ['Diário Digital P']:
+        return 'Diário Digital'
+
+    if source_text in ['Boas Noticias']:
+        return 'Boas Notícias'
+
+    if source_text in ['Meios e Publicidade']:
+        return 'Meios & Publicidade'
 
     return source_text
 
