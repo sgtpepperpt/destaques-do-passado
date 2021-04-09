@@ -1,16 +1,15 @@
-from glob import glob
 import json
 import os
+import pathlib
+import re
 from collections import Counter
 
-import re
 import chardet
 import requests
-import pathlib
-
 from bs4 import BeautifulSoup
+from glob import glob
 
-from config.crawl_config import news_sources
+from config.sources import news_sources
 from src.util import is_https_link, get_actual_source, encode_url
 
 
