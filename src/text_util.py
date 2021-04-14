@@ -9,10 +9,12 @@ def remove_clutter(text):
     if not text:
         return
 
-    clutter = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)',
-               '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', '(VÍDEO)', 'PORTUGAL:', '(COM TRAILER)',
-               'EXCLUSIVO:', '(galeria de fotos)', '(com fotogaleria)', '(ouve-o aqui)']
-    for elem in clutter:
+    to_remove = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)',
+                 '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', '(VÍDEO)', 'PORTUGAL:', '(COM TRAILER)',
+                 'EXCLUSIVO:', '(galeria de fotos)', '(com fotogaleria)', '(ouve-o aqui)', '(fotogaleria)', '(FOTOS)',
+                 '(vídeo)', '[em actualização]']
+
+    for elem in to_remove:
         text = text.replace(elem, '')
 
     if text.startswith('•') or text.startswith(',') or text.startswith(':'):
@@ -29,6 +31,19 @@ def remove_clutter(text):
 def clean_special_chars(text):
     # removes clutter and also special chars from the text
     return re.sub(r'[\W|»|”|"|’]+$', '', remove_clutter(text))
+
+
+def prettify_title(title):
+    if not title:
+        return
+
+    # remove spaces with ellipsis
+    if title.endswith('...'):
+        title = title[:-3].strip() + '...'
+
+    title = remove_clutter(title)
+
+    return clean_spacing(title)
 
 
 def prettify_text(text):
@@ -69,6 +84,11 @@ def prettify_text(text):
     if text.startswith('PDiário:'):
         text = text.replace('PDiário:', '')
 
+    # remove more clutter
+    to_remove = ['IMPRIMIR(0). ENVIAR. TAGS.']
+    for elem in to_remove:
+        text = text.replace(elem, '')
+
     # remove doubled spaces
     text = clean_spacing(text)
 
@@ -82,28 +102,37 @@ def prettify_text(text):
 
 
 def ignore_title(title):
+    ignore_starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
+                     'Vídeo:', 'Público lança', 'Público vence', 'Consulte as previsões', 'Previsão do tempo',
+                     'Veja o tempo', 'Comentário:', 'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:',
+                     'Blog ', 'Home ', 'CR7 exclusivo em', 'http', 'Mudança na publicação de comentários online',
+                     'Quiosque:', 'Comente ', 'Euromilhões', 'Vote', 'Opinião:', 'Nota editorial', 'Faça aqui',
+                     'Expresso nos', 'Já pensou onde ir', 'Top 10', 'Conheça as novidades do site',
+                     'Justiça seja feita', 'Revista \'Lui\' tira a roupa', 'Veja', 'Editorial', 'Sudoku (',
+                     'As melhores fotografias', 'Esta é a fotografia', 'Conheça', 'Fórum:', 'GALERIA DE FOTOS',
+                     'Infografista do PÚBLICO', 'Vídeos d']
+
+    ignore_contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso',
+                       'para a casa ir abaixo', 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso',
+                       'A primeira página do', 'a Revista E', 'A grande revista sobre o Benfica campeão',
+                       'notícias + lidas', 'Portal AEIOU', 'mulheres da vida de', 'adivinhe']
+
     allows = ['Sorteio da Liga', 'Sorteio dos quartos', 'Sorteio da Superliga']
-    starts = ['Revista de imprensa', 'Destaques d', 'Sorteio', 'Chave do', 'Jackpot', 'Dossier:', 'Fotogaleria',
-              'Vídeo:', 'Público lança', 'Público vence', 'Consulte as previsões', 'Previsão do tempo', 'Veja o tempo', 'Comentário:',
-              'Reportagem:', 'Exclusivo assinantes', 'Entrevista:', 'Perfil:', 'Blog ', 'Home ', 'CR7 exclusivo em', 'http',
-              'Mudança na publicação de comentários online', 'Quiosque:', 'Comente ', 'Euromilhões', 'Vote', 'Opinião:',
-              'Nota editorial', 'Faça aqui', 'Expresso nos', 'Já pensou onde ir', 'Top 10', 'Conheça as novidades do site',
-              'Justiça seja feita', 'Revista \'Lui\' tira a roupa', 'Veja', 'Editorial', 'Sudoku (',
-              'As melhores fotografias', 'Esta é a fotografia', 'Conheça']
-    for forbidden in starts:
+
+    for forbidden in ignore_starts:
         if title.lower().startswith(forbidden.lower()):
             return True
 
-    contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso', 'para a casa ir abaixo',
-                'Expresso Diário', 'dicas para', 'A 1ª página do Expresso', 'A primeira página do', 'a Revista E',
-                'A grande revista sobre o Benfica campeão', 'notícias + lidas', 'Portal AEIOU', 'mulheres da vida de',
-                'adivinhe']
-    for forbidden in contains:
+    for forbidden in ignore_contains:
         if forbidden.lower() in title.lower() and forbidden.lower() not in allows:
             return True
 
     # ignore if the title starts with a date/time
     if re.match(r'[0-3][0-9]\.[0-1][0-9]\.[1-2][0-9][0-9][0-9]\s*-\s*.*', title):
+        return True
+
+    # ignore if it's a job offer
+    if re.match(r'.* procura .* \((?:m/f|m|f)\)\s*$', title):
         return True
 
     return False

@@ -19,7 +19,7 @@ class Category(Enum):
     ENVIRONMENT = 'Ambiente'
     OPINION = 'Opinião'
     UNUSUAL = 'Insólito'
-    MISC = 'Outras'
+    MISC = 'Miscelânea'
 
 
 category_bindings = {

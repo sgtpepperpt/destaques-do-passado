@@ -32,7 +32,7 @@ from src.scrapers.publico_scrapers import ScraperPublico02, ScraperPublico03, Sc
 
 from src.scrapers.news_scraper import ScraperCentral
 from src.sources import bind_source, source_name_from_file
-from src.text_util import remove_clutter, prettify_text, ignore_title, ignore_pretitle
+from src.text_util import remove_clutter, prettify_text, ignore_title, ignore_pretitle, prettify_title
 from src.util import *
 
 
@@ -135,17 +135,17 @@ def scrape_source(scraper, source, cursor, db_insert=True):
             article_url = article_url.replace('noFrame/replay', 'wayback')
 
             #  title, pretitle and snippet cleanups
-            title = remove_clutter(n['title'])
+            title = prettify_title(n['title'])
             if ignore_title(title):
                 continue
 
-            pretitle = remove_clutter(n.get('headline'))
+            pretitle = prettify_title(n.get('headline'))
             if ignore_pretitle(pretitle):
                 continue
 
             snippet = prettify_text(n.get('snippet'))
 
-            print('{}; {}; {} / {} {} / {}; {}'.format(title, pretitle, snippet, category, article_source, article_url, n.get('img_url')))
+            print('{}; {}; {} / {}; {} / {}; {}'.format(title, pretitle, snippet, category, article_source, article_url, n.get('img_url')))
 
             # add article to DB
             if not db_insert:

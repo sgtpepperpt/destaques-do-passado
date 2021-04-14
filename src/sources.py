@@ -17,6 +17,15 @@ def bind_source(source_text):
     if source_text.startswith('Diário Economico'):
         return 'Diário Económico'
 
+    if source_text.startswith('TSF'):
+        return 'TSF'
+
+    if source_text.startswith('Visão'):
+        return 'Visão'
+
+    if source_text.lower().startswith('blitz'):
+        return 'BLITZ'
+
     if 'aeiou' in source_text.lower():
         return 'AEIOU'
 
