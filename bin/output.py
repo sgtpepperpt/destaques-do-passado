@@ -7,14 +7,14 @@ from src.util import remove_destaques_uniqueness
 def count_category(cursor, day, month, category):
     res = cursor.execute('''
             WITH stats AS (
-                SELECT * FROM articles
+                SELECT snippet IS NOT NULL AS has_snippet, COALESCE(img_urls.status = 200, FALSE) AS has_image FROM articles
                 LEFT OUTER JOIN urls AS img_urls on articles.img_url = img_urls.url
                 WHERE day = ? AND month = ? AND category = ?
             )
             SELECT
                 (SELECT COUNT(*) FROM stats) AS total,
-                (SELECT COUNT(*) FROM stats WHERE snippet IS NOT NULL OR stats.status = 200) AS large,
-                (SELECT COUNT(*) FROM stats WHERE snippet IS NULL AND (stats.status != 200 OR stats.status IS NULL)) AS small
+                (SELECT COUNT(*) FROM stats WHERE has_snippet OR has_image) AS large,
+                (SELECT COUNT(*) FROM stats WHERE NOT has_snippet AND NOT has_image) AS small
         ''', (day, month, category)).fetchall()[0]
 
     return {
