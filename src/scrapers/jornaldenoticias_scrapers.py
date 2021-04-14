@@ -107,7 +107,7 @@ class ScraperJornalDeNoticias02(NewsScraper):
             all_news.append({
                 'article_url': generate_dummy_url(self.source, 'parser02', category, title),
                 'title': title,
-                'snippet': prettify_text(snippet) if snippet else None,
+                'snippet': snippet,
                 'headline': headline,
                 'category': category,
                 'importance': define_importance(title_elem)
@@ -381,8 +381,8 @@ class ScraperJornalDeNoticias04(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.get('href') + generate_destaques_uniqueness('parser04/Em foco', title, headline_elem.get_text()),
-                'headline': remove_clutter(headline_elem.get_text()),
-                'title': remove_clutter(title),
+                'headline': headline_elem.get_text(),
+                'title': title,
                 'category': 'Em foco',
                 'importance': Importance.SMALL
             })
@@ -1167,8 +1167,8 @@ class ScraperJornalDeNoticias08(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'title': title_elem.get_text(),
+                'snippet': snippet,
                 'img_url': img,
                 'category': 'Destaque',
                 'importance': Importance.FEATURE
@@ -1185,8 +1185,8 @@ class ScraperJornalDeNoticias08(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'title': title_elem.get_text(),
+                'snippet': snippet,
                 'category': 'Destaque',
                 'importance': Importance.LARGE
             })
@@ -1219,9 +1219,9 @@ class ScraperJornalDeNoticias08(NewsScraper):
 
                 all_news.append({
                     'article_url': title_elem.get('href'),
-                    'headline': remove_clutter(headline),
-                    'title': remove_clutter(title_elem.get_text()),
-                    'snippet': prettify_text(snippet),
+                    'headline': headline,
+                    'title': title_elem.get_text(),
+                    'snippet': snippet,
                     'category': category,
                     'importance': Importance.SMALL
                 })
@@ -1238,9 +1238,9 @@ class ScraperJornalDeNoticias08(NewsScraper):
 
                 all_news.append({
                     'article_url': title_elem.get('href'),
-                    'headline': remove_clutter(headline),
-                    'title': remove_clutter(title_elem.get_text()),
-                    'snippet': prettify_text(snippet),
+                    'headline': headline,
+                    'title': title_elem.get_text(),
+                    'snippet': snippet,
                     'category': category,
                     'importance': Importance.SMALL
                 })
@@ -1270,8 +1270,8 @@ class ScraperJornalDeNoticias08(NewsScraper):
 
                 all_news.append({
                     'article_url': title_elem.get('href'),
-                    'title': remove_clutter(title),
-                    'snippet': prettify_text(snippet),
+                    'title': title,
+                    'snippet': snippet,
                     'img_url': img_url,
                     'category': 'Últimas',
                     'importance': Importance.LATEST
@@ -1329,8 +1329,8 @@ class ScraperJornalDeNoticias09(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'title': title_elem.get_text(),
+                'snippet': snippet,
                 'img_url': img_url,
                 'category': category,
                 'importance': default_importance
@@ -1341,7 +1341,7 @@ class ScraperJornalDeNoticias09(NewsScraper):
                 for title_elem in related_elems.find_all('a'):
                     all_news.append({
                         'article_url': title_elem.get('href'),
-                        'title': remove_clutter(title_elem.get_text()),
+                        'title': title_elem.get_text(),
                         'category': 'Outras',
                         'importance': Importance.RELATED
                     })
@@ -1423,7 +1423,7 @@ class ScraperJornalDeNoticias09(NewsScraper):
         for title_elem in latest_elems1 + latest_elems2:
             all_news.append({
                 'article_url': title_elem.get('href') or generate_dummy_url('jn.pt', 'parser09', 'latest', title_elem.get_text()),  # one case doesn't have url (20100530140119)
-                'title': remove_clutter(title_elem.get_text()),
+                'title': title_elem.get_text(),
                 'category': 'Outras',
                 'importance': Importance.LATEST
             })
@@ -1442,7 +1442,7 @@ def extract_local_news(all_news, local_elems):
 
         all_news.append({
             'article_url': title_elem.get('href'),
-            'title': remove_clutter(title_elem.get_text()),
+            'title': title_elem.get_text(),
             'headline': headline_elem.get_text(),
             'category': 'Local',
             'importance': Importance.SMALL

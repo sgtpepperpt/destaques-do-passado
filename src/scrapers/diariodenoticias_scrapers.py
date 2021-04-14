@@ -1,7 +1,7 @@
 import re
 
 from src.util import generate_dummy_url, find_comments, get_direct_strings
-from src.text_util import remove_clutter, clean_special_chars, prettify_text
+from src.text_util import remove_clutter, clean_special_chars
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
@@ -41,7 +41,7 @@ class ScraperDiarioDeNoticias02(NewsScraper):
                 'article_url': url,
                 'headline': pretitle if len(pretitle) > 0 else None,
                 'title': title,
-                'snippet': prettify_text(snippet),
+                'snippet': snippet,
                 'img_url': img_url,
                 'category': 'Destaque',
                 'importance': Importance.FEATURE if img_url else Importance.LARGE if snippet else Importance.SMALL
@@ -77,7 +77,7 @@ class ScraperDiarioDeNoticias04(NewsScraper):
 
                 all_news.append({
                     'article_url': title_elem.get('href'),
-                    'title': remove_clutter(title_elem.get_text()),
+                    'title': title_elem.get_text(),
                     'category': clean_special_chars(category),
                     'importance': Importance.LARGE
                 })
@@ -133,7 +133,7 @@ class ScraperDiarioDeNoticias05(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.find_parent('a').get('href'),
-                'title': remove_clutter(title_elem.get_text()),
+                'title': title_elem.get_text(),
                 'headline': pretitle,
                 'snippet': snippet_elem.get_text(),
                 'img_url': img_url,
@@ -149,7 +149,7 @@ class ScraperDiarioDeNoticias05(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.find_parent('a').get('href'),
-                'title': remove_clutter(title_elem.get_text()),
+                'title': title_elem.get_text(),
                 'category': clean_special_chars(category),
                 'importance': Importance.SMALL
             })
@@ -163,7 +163,7 @@ class ScraperDiarioDeNoticias05(NewsScraper):
 
                 all_news.append({
                     'article_url': title_elem.find_parent('a').get('href'),
-                    'title': remove_clutter(title_elem.get_text()),
+                    'title': title_elem.get_text(),
                     'pretitle': pretitle_elem.get_text(),
                     'category': 'Outras',
                     'importance': Importance.LATEST

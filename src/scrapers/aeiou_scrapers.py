@@ -2,9 +2,8 @@ import re
 
 from bs4 import NavigableString, Comment, Tag
 
-from src.util import is_link_pt, find_comments, is_between, find_comments_regex, get_direct_strings, \
-    generate_destaques_uniqueness
-from src.text_util import remove_clutter, clean_special_chars, prettify_text, ignore_title
+from src.util import find_comments, is_between, find_comments_regex, get_direct_strings, generate_destaques_uniqueness
+from src.text_util import remove_clutter, clean_special_chars
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
@@ -92,7 +91,7 @@ class ScraperAeiou01(NewsScraper):
             title_elem = title_elem.find('a')
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
+                'title': title_elem.get_text(),
                 'source': source,
                 'category': category,
                 'importance': Importance.SMALL

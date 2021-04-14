@@ -1,6 +1,6 @@
 import re
 
-from src.text_util import remove_clutter, prettify_text, ignore_title
+from src.text_util import remove_clutter, ignore_title
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
@@ -23,8 +23,8 @@ class ScraperPortugalDiario01(NewsScraper):
 
         all_news.append({
             'article_url': url,
-            'title': remove_clutter(title),
-            'snippet': prettify_text(snippet),
+            'title': title,
+            'snippet': snippet,
             'category': 'Destaque',
             'importance': Importance.FEATURE
         })
@@ -37,9 +37,9 @@ class ScraperPortugalDiario01(NewsScraper):
 
             all_news.append({
                 'article_url': url.get('href'),
-                'headline': remove_clutter(headline),
-                'title': remove_clutter(url.get_text()),
-                'snippet': prettify_text(snippet),
+                'headline': headline,
+                'title': url.get_text(),
+                'snippet': snippet,
                 'category': 'Destaque',
                 'importance': Importance.LARGE
             })
@@ -115,9 +115,9 @@ class ScraperPortugalDiario02(NewsScraper):
 
                 all_news.append({
                     'article_url': url,
-                    'headline': remove_clutter(headline),
-                    'title': remove_clutter(title),
-                    'snippet': prettify_text(snippet),
+                    'headline': headline,
+                    'title': title,
+                    'snippet': snippet,
                     'img_url': img_url,
                     'source': source,  # in some cases the site also aggregates others' news
                     'category': category,
@@ -164,8 +164,8 @@ def process_small_features(all_news, small_features):
 
         all_news.append({
             'article_url': check_url(title_elem.get('href')),
-            'title': remove_clutter(title_elem.get_text()),
-            'snippet': prettify_text(snippet),
+            'title': title_elem.get_text(),
+            'snippet': snippet,
             'category': 'Destaque',
             'importance': Importance.LARGE
         })
@@ -195,9 +195,9 @@ class ScraperPortugalDiario03(NewsScraper):
 
         all_news.append({
             'article_url': large_feature_url_elem.get('href'),
-            'headline': remove_clutter(large_feature_headline_elem.get_text()),
-            'title': remove_clutter(large_feature_url_elem.get_text()),
-            'snippet': prettify_text(large_feature_snippet),
+            'headline': large_feature_headline_elem.get_text(),
+            'title': large_feature_url_elem.get_text(),
+            'snippet': large_feature_snippet,
             'img_url': large_feature_img_elem.get('src'),
             'category': 'Destaque',
             'importance': Importance.FEATURE
@@ -229,8 +229,8 @@ class ScraperPortugalDiario04(NewsScraper):
 
         all_news.append({
             'article_url': check_url(featured_url_elem.get('href')),
-            'title': remove_clutter(featured_url_elem.get_text()),
-            'snippet': prettify_text(featured_snippet),
+            'title': featured_url_elem.get_text(),
+            'snippet': featured_snippet,
             'img_url': check_url(featured_img_elem.get('src')),
             'category': 'Destaque',
             'importance': Importance.FEATURE
@@ -241,7 +241,7 @@ class ScraperPortugalDiario04(NewsScraper):
         for article in related:
             all_news.append({
                 'article_url': check_url(article.get('href')),
-                'title': remove_clutter(article.get_text()),
+                'title': article.get_text(),
                 'category': 'Outras',
                 'importance': Importance.RELATED
             })
@@ -273,8 +273,8 @@ class ScraperPortugalDiario05(NewsScraper):
 
         all_news.append({
             'article_url': featured_url_elem.get('href'),
-            'title': remove_clutter(featured_url_elem.get_text()),
-            'snippet': prettify_text(featured_snippet),
+            'title': featured_url_elem.get_text(),
+            'snippet': featured_snippet,
             'img_url': featured_img_elem.get('src'),
             'category': 'Destaque',
             'importance': Importance.FEATURE
@@ -300,7 +300,7 @@ class ScraperPortugalDiario05(NewsScraper):
             for article in [article.find('a') for article in latest_elem.find_all('li')]:
                 all_news.append({
                     'article_url': article.get('href'),
-                    'title': remove_clutter(article.get_text()),
+                    'title': article.get_text(),
                     'category': 'Última hora',
                     'importance': Importance.LATEST
                 })
@@ -316,8 +316,8 @@ class ScraperPortugalDiario05(NewsScraper):
 
             all_news.append({
                 'article_url': url_elem.get('href'),
-                'title': remove_clutter(url_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'title': url_elem.get_text(),
+                'snippet': snippet,
                 'category': 'Destaque',
                 'importance': Importance.LARGE
             })
@@ -336,7 +336,7 @@ class ScraperPortugalDiario05(NewsScraper):
 
                     all_news.append({
                         'article_url': article.get('href'),
-                        'title': remove_clutter(article.get_text()),
+                        'title': article.get_text(),
                         'category': category,
                         'importance': Importance.SMALL
                     })
@@ -360,9 +360,9 @@ class ScraperPortugalDiario06(NewsScraper):
 
             all_news.append({
                 'article_url': url_elem.get('href'),
-                'headline': remove_clutter(headline),
-                'title': remove_clutter(url_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'headline': headline,
+                'title': url_elem.get_text(),
+                'snippet': snippet,
                 'category': 'Destaque',
                 'importance': Importance.FEATURE
             })
@@ -385,9 +385,9 @@ class ScraperPortugalDiario06(NewsScraper):
 
             all_news.append({
                 'article_url': url_elem.get('href'),
-                'headline': remove_clutter(headline),
-                'title': remove_clutter(url_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'headline': headline,
+                'title': url_elem.get_text(),
+                'snippet': snippet,
                 'img_url': img_url,
                 'category': 'Destaque',
                 'importance': Importance.LARGE
@@ -398,7 +398,7 @@ class ScraperPortugalDiario06(NewsScraper):
             for related_article in [related_article.find('a') for related_article in related]:
                 all_news.append({
                     'article_url': related_article.get('href'),
-                    'title': remove_clutter(related_article.get_text()),
+                    'title': related_article.get_text(),
                     'category': 'Outras',
                     'importance': Importance.RELATED
                 })
@@ -415,7 +415,7 @@ class ScraperPortugalDiario06(NewsScraper):
             url_elem = category_elem.find_next('a')
             all_news.append({
                 'article_url': url_elem.get('href'),
-                'title': remove_clutter(url_elem.get_text()),
+                'title': url_elem.get_text(),
                 'category': category,
                 'importance': Importance.LATEST
             })
@@ -436,8 +436,8 @@ class ScraperPortugalDiario06(NewsScraper):
             importance = Importance.LARGE if 'first' in (article.get('class') or []) else Importance.SMALL
             all_news.append({
                 'article_url': url_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'title': title_elem.get_text(),
+                'snippet': snippet,
                 'img_url': img_url,
                 'category': 'Desporto',
                 'importance': importance

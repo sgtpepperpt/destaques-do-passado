@@ -86,7 +86,7 @@ class ScraperPublico03(NewsScraper):
             all_news.append({
                 'article_url': url,
                 'img_url': img_src,
-                'headline': remove_clutter(head),
+                'headline': head,
                 'title': extract_title(destaque),
                 'snippet': snippet,
                 'category': 'Destaque',
@@ -160,7 +160,7 @@ class ScraperPublico04(NewsScraper):
             all_news.append({
                 'article_url': destaque['href'],
                 'img_url': img_src,
-                'headline': remove_clutter(head),
+                'headline': head,
                 'title': extract_title(destaque),
                 'snippet': snippet,
                 'category': 'Destaque',
@@ -247,7 +247,7 @@ class ScraperPublico05(NewsScraper):
 
             all_news.append({
                 'article_url': title['href'],
-                'headline': remove_clutter(head),
+                'headline': head,
                 'title': extract_title(title.find('strong')),
                 'snippet': snippet,
                 'category': 'Destaque',

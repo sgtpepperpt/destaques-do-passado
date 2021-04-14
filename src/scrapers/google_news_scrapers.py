@@ -1,7 +1,7 @@
 import re
 
 from src.util import is_link_pt
-from src.text_util import remove_clutter, clean_special_chars, prettify_text, ignore_title
+from src.text_util import clean_special_chars, ignore_title
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 
@@ -41,11 +41,13 @@ class ScraperGoogleNews01(NewsScraper):
 
             snippet_elem = link.next_sibling.next_sibling.next_sibling.next_sibling
             if snippet_elem.name == 'font':
-                snippet = prettify_text(snippet_elem.get_text())
+                snippet = snippet_elem.get_text()
+            else:
+                snippet = None
 
             news = {
                 'article_url': url,
-                'title': remove_clutter(title),
+                'title': title,
                 'source': source,
                 'snippet': snippet,
                 'category': category,
@@ -93,9 +95,9 @@ class ScraperGoogleNews02(NewsScraper):
 
             news = {
                 'article_url': url,
-                'title': remove_clutter(title),
+                'title': title,
                 'source': source,
-                'snippet': prettify_text(snippet),
+                'snippet': snippet,
                 'category': category,
                 'importance': Importance.LARGE
             }
@@ -133,9 +135,9 @@ class ScraperGoogleNews03(NewsScraper):
 
             all_news.append({
                 'article_url': url,
-                'title': remove_clutter(title),
+                'title': title,
                 'source': source,
-                'snippet': prettify_text(snippet),
+                'snippet': snippet,
                 'img_url': img_url,
                 'category': category,
                 'importance': Importance.LARGE
@@ -151,7 +153,7 @@ class ScraperGoogleNews03(NewsScraper):
             #
             #     all_news.append({
             #         'article_url': url,
-            #         'title': remove_clutter(title),
+            #         'title': title,
             #         'source': source,
             #         'category': category,
             #         'importance': Importance.RELATED
@@ -166,7 +168,7 @@ class ScraperGoogleNews03(NewsScraper):
             #
             #     all_news.append({
             #         'article_url': url,
-            #         'title': remove_clutter(title),
+            #         'title': title,
             #         'source': source,
             #         'category': category,
             #         'importance': Importance.RELATED
@@ -196,7 +198,7 @@ class ScraperGoogleNews03(NewsScraper):
 
             all_news.append({
                 'article_url': url,
-                'title': remove_clutter(title),
+                'title': title,
                 'source': source,
                 'category': 'Outras',
                 'importance': importance

@@ -41,8 +41,8 @@ class ScraperExpresso01(NewsScraper):
 
             all_news.append({
                 'article_url': url,
-                'title': remove_clutter(title),
-                'snippet': prettify_text(snippet),
+                'title': title,
+                'snippet': snippet,
                 'img_url': img,
                 'headline': headline,
                 'category': 'Destaque',
@@ -76,10 +76,10 @@ class ScraperExpresso01(NewsScraper):
 
             all_news.append({
                 'article_url': url,
-                'title': remove_clutter(title_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'title': title_elem.get_text(),
+                'snippet': snippet,
                 'img_url': img,
-                'headline': remove_clutter(headline),
+                'headline': headline,
                 'category': 'Destaque',
                 'importance': Importance.LARGE
             })
@@ -95,7 +95,7 @@ class ScraperExpresso01(NewsScraper):
         for article_elem in [article.find('b') for article in latest_news]:
             all_news.append({
                 'article_url': article_elem.find_next('a').get('href'),
-                'title': remove_clutter(article_elem.get_text()),
+                'title': article_elem.get_text(),
                 'category': 'Outras',
                 'importance': Importance.LATEST
             })
@@ -142,8 +142,8 @@ class ScraperExpresso02(NewsScraper):
 
             all_news.append({
                 'article_url': url,
-                'title': remove_clutter(title),
-                'snippet': prettify_text(snippet),
+                'title': title,
+                'snippet': snippet,
                 'img_url': img,
                 'headline': headline,
                 'category': category,
@@ -154,7 +154,7 @@ class ScraperExpresso02(NewsScraper):
         for elem in [e.find('a') for e in related_elems]:
             all_news.append({
                 'article_url': elem.get('href'),
-                'title': remove_clutter(elem.get_text()),
+                'title': elem.get_text(),
                 'category': self.find_category(categories, soup.contents[0], elem),
                 'importance': Importance.RELATED
             })
@@ -207,8 +207,8 @@ class ScraperExpresso04(NewsScraper):
 
         return {
             'article_url': url,
-            'title': remove_clutter(title),
-            'snippet': prettify_text(snippet),
+            'title': title,
+            'snippet': snippet,
             'img_url': img,
             'headline': headline,
             'category': category,
@@ -272,7 +272,7 @@ class ScraperExpresso05(NewsScraper):
         return {
             'article_url': url,
             'title': title,
-            'snippet': prettify_text(snippet),
+            'snippet': snippet,
             'img_url': img,
             'headline': headline,
             'category': category,
@@ -296,8 +296,8 @@ class ScraperExpresso05(NewsScraper):
 
         return {
             'article_url': url,
-            'title': remove_clutter(title),
-            'snippet': prettify_text(snippet),
+            'title': title,
+            'snippet': snippet,
             'img_url': img,
             'category': 'Destaque',
             'importance': Importance.LARGE
@@ -320,7 +320,7 @@ class ScraperExpresso05(NewsScraper):
         for elem in [e.find_parent('a') for e in related_elems]:
             all_news.append({
                 'article_url': elem.get('href'),
-                'title': remove_clutter(elem.get_text()),
+                'title': elem.get_text(),
                 'category': 'Outras',
                 'importance': Importance.RELATED
             })
@@ -338,7 +338,7 @@ class ScraperExpresso05(NewsScraper):
         for elem in [a.find('a') for a in short_articles]:
             all_news.append({
                 'article_url': elem.get('href'),
-                'title': remove_clutter(elem.get_text()),
+                'title': elem.get_text(),
                 'category': 'Outras',
                 'importance': Importance.LATEST
             })
@@ -363,8 +363,8 @@ def scrape_online_version(soup):
 
         all_news.append({
             'article_url': title_elem.get('href'),
-            'title': remove_clutter(title_elem.get_text()),
-            'snippet': prettify_text(snippet_elem.get_text()),
+            'title': title_elem.get_text(),
+            'snippet': snippet_elem.get_text(),
             'img_url': img_url,
             'headline': headline,
             'category': 'Destaque',
@@ -378,7 +378,7 @@ def scrape_online_version(soup):
             for article in related_articles:
                 all_news.append({
                     'article_url': article.get('href'),
-                    'title': remove_clutter(article.get_text()),
+                    'title': article.get_text(),
                     'category': 'Outras',
                     'importance': Importance.RELATED
                 })
@@ -393,7 +393,7 @@ def scrape_online_version(soup):
         for article in latest_articles:
             all_news.append({
                 'article_url': article.get('href'),
-                'title': remove_clutter(article.get_text()),
+                'title': article.get_text(),
                 'category': 'Outras',
                 'importance': Importance.LATEST
             })
@@ -404,8 +404,8 @@ def scrape_online_version(soup):
         headline = title_elem.find_previous('span', class_='antetituloazul')
         all_news.append({
             'article_url': title_elem.get('href'),
-            'title': remove_clutter(title_elem.get_text()),
-            'headline': remove_clutter(headline.get_text()),
+            'title': title_elem.get_text(),
+            'headline': headline.get_text(),
             'category': 'Outras',
             'importance': Importance.LATEST
         })
@@ -436,10 +436,10 @@ def scrape_semanal_version(soup):
 
         all_news.append({
             'article_url': title_elem.get('href'),
-            'title': remove_clutter(title),
+            'title': title,
             'snippet': snippet,
             'img_url': img_url,
-            'headline': remove_clutter(headline),
+            'headline': headline,
             'category': 'Destaque',
             'importance': Importance.FEATURE
         })
@@ -477,10 +477,10 @@ def scrape_semanal_version(soup):
 
         all_news.append({
             'article_url': title_elem.get('href'),
-            'title': remove_clutter(title),
+            'title': title,
             'snippet': snippet,
             'img_url': img_url,
-            'headline': remove_clutter(headline),
+            'headline': headline,
             'category': category,
             'importance': Importance.FEATURE
         })
@@ -571,7 +571,7 @@ def scrape_modern_online_version(soup):
     for article_elem in short_titles:
         all_news.append({
             'article_url': article_elem.get('href'),
-            'title': remove_clutter(article_elem.get_text()),
+            'title': article_elem.get_text(),
             'category': 'Outras',
             'importance': Importance.SMALL
         })
@@ -704,7 +704,7 @@ class ScraperExpresso24(NewsScraper):
 
             all_news.append({
                 'article_url': url_elem.get('href'),
-                'title': remove_clutter(title),
+                'title': title,
                 'snippet': snippet,
                 'category': category,
                 'importance': Importance.LARGE
@@ -723,8 +723,8 @@ class ScraperExpresso24(NewsScraper):
 
             all_news.append({
                 'article_url': generate_dummy_url(self.source, 'scraper24', category, title),
-                'title': remove_clutter(title),
-                'snippet': prettify_text(snippet),
+                'title': title,
+                'snippet': snippet,
                 'category': category,
                 'importance': Importance.SMALL,
                 'source': 'SIC'
@@ -755,9 +755,9 @@ class ScraperExpresso25(NewsScraper):
 
             all_news.append({
                 'article_url': article_elem.get('href'),
-                'title': remove_clutter(title),
+                'title': title,
                 'snippet': snippet,
-                'headline': remove_clutter(headline),
+                'headline': headline,
                 'img_url': img_url,
                 'category': 'Destaque',
                 'importance': Importance.FEATURE
@@ -774,8 +774,8 @@ class ScraperExpresso25(NewsScraper):
 
             all_news.append({
                 'article_url': article_elem.get('href'),
-                'title': remove_clutter(title),
-                'headline': remove_clutter(headline),
+                'title': title,
+                'headline': headline,
                 'img_url': img_url,
                 'category': category,
                 'importance': Importance.SMALL
@@ -793,7 +793,7 @@ class ScraperExpresso25(NewsScraper):
 
             all_news.append({
                 'article_url': article_elem.get('href'),
-                'title': remove_clutter(title),
+                'title': title,
                 'snippet': snippet,
                 'category': 'Outras',
                 'importance': Importance.LATEST
@@ -832,7 +832,7 @@ class ScraperExpresso26(NewsScraper):
         all_news.append({
             'article_url': title_elem.get('href'),
             'title': title,
-            'snippet': prettify_text(snippet),
+            'snippet': snippet,
             'headline': headline,
             'img_url': img_url,
             'category': category,
@@ -870,9 +870,9 @@ class ScraperExpresso26(NewsScraper):
 
         all_news.append({
             'article_url': title_elem.get('href'),
-            'title': remove_clutter(title_elem.get_text()),
-            'snippet': prettify_text(snippet),
-            'headline': remove_clutter(headline_elem.get_text()),
+            'title': title_elem.get_text(),
+            'snippet': snippet,
+            'headline': headline_elem.get_text(),
             'img_url': img_url,
             'category': category,
             'importance': Importance.FEATURE
@@ -930,7 +930,7 @@ class ScraperExpresso26(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
+                'title': title_elem.get_text(),
                 'headline': headline,
                 'img_url': img_url,
                 'category': category,
@@ -956,7 +956,7 @@ class ScraperExpresso26(NewsScraper):
 
                 all_news.append({
                     'article_url': title_elem.get('href'),
-                    'title': remove_clutter(title_elem.get_text()),
+                    'title': title_elem.get_text(),
                     'category': actual_cat,
                     'importance': Importance.SMALL
                 })
@@ -983,9 +983,9 @@ class ScraperExpresso27(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
-                'snippet': prettify_text(snippet),
-                'headline': remove_clutter(headline_elem.get_text()),
+                'title': title_elem.get_text(),
+                'snippet': snippet,
+                'headline': headline_elem.get_text(),
                 'img_url': img_url,
                 'category': 'Destaque',
                 'importance': Importance.FEATURE
@@ -996,7 +996,7 @@ class ScraperExpresso27(NewsScraper):
             for title_elem in [e.find('a') for e in related_articles]:
                 all_news.append({
                     'article_url': title_elem.get('href'),
-                    'title': remove_clutter(title_elem.get_text()),
+                    'title': title_elem.get_text(),
                     'category': 'Outras',
                     'importance': Importance.RELATED
                 })
@@ -1024,8 +1024,8 @@ class ScraperExpresso27(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'title': title_elem.get_text(),
+                'snippet': snippet,
                 'headline': headline,
                 'img_url': img_url,
                 'category': 'Destaque',
@@ -1041,8 +1041,8 @@ class ScraperExpresso27(NewsScraper):
 
                 all_news.append({
                     'article_url': title_elem.get('href'),
-                    'title': remove_clutter(title_elem.get_text()),
-                    'headline': remove_clutter(headline_elem.get_text()),
+                    'title': title_elem.get_text(),
+                    'headline': headline_elem.get_text(),
                     'category': 'Destaque',
                     'importance': Importance.LATEST
                 })
@@ -1052,7 +1052,7 @@ class ScraperExpresso27(NewsScraper):
         for title_elem in [e.find('span', class_='texto').find('a') for e in lusa_features]:
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
+                'title': title_elem.get_text(),
                 'category': 'Destaque',
                 'importance': Importance.LATEST,
                 'source': 'Lusa'
@@ -1081,8 +1081,8 @@ class ScraperExpresso27(NewsScraper):
 
                 all_news.append({
                     'article_url': title_elem.get('href'),
-                    'title': remove_clutter(title_elem.get_text()),
-                    'snippet': prettify_text(snippet),
+                    'title': title_elem.get_text(),
+                    'snippet': snippet,
                     'img_url': img_url,
                     'category': category,
                     'importance': Importance.SMALL
@@ -1094,7 +1094,7 @@ class ScraperExpresso27(NewsScraper):
             source_elem = title_elem.find_next('div', class_='comentario').find('a')
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
+                'title': title_elem.get_text(),
                 'category': 'Outras',
                 'importance': Importance.SMALL,
                 'source': clean_special_chars(source_elem.get_text())
@@ -1130,8 +1130,8 @@ class ScraperExpresso28(NewsScraper):
 
             all_news.append({
                 'article_url': title_elem.get('href'),
-                'title': remove_clutter(title_elem.get_text()),
-                'snippet': prettify_text(snippet),
+                'title': title_elem.get_text(),
+                'snippet': snippet,
                 'img_url': img_url,
                 'category': 'Destaque',
                 'importance': importance
@@ -1149,7 +1149,7 @@ class ScraperExpresso28(NewsScraper):
 
                 all_news.append({
                     'article_url': title_elem.get('href'),
-                    'title': remove_clutter(title),
+                    'title': title,
                     'category': 'Outras',
                     'importance': Importance.RELATED
                 })
