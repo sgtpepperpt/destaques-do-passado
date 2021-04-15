@@ -52,7 +52,7 @@ def get_day_stats(cursor, day, month):
     categories = {k: v for (k, v) in categories.items() if v['total'] > 0}
 
     years = cursor.execute('SELECT DISTINCT year FROM articles WHERE day = ? AND month = ?', (day, month)).fetchall()
-    years = [year[0] for year in years]
+    years = sorted([year[0] for year in years])
 
     return {
         'total': total_articles,

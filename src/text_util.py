@@ -12,7 +12,7 @@ def remove_clutter(text):
     to_remove = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)',
                  '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', '(VÍDEO)', 'PORTUGAL:', '(COM TRAILER)',
                  'EXCLUSIVO:', '(galeria de fotos)', '(com fotogaleria)', '(ouve-o aqui)', '(fotogaleria)', '(FOTOS)',
-                 '(vídeo)', '[em actualização]']
+                 '(vídeo)', '[em actualização]', '(com VÍDEO)']
 
     for elem in to_remove:
         text = text.replace(elem, '')
@@ -85,7 +85,7 @@ def prettify_text(text):
         text = text.replace('PDiário:', '')
 
     # remove more clutter
-    to_remove = ['IMPRIMIR(0). ENVIAR. TAGS.']
+    to_remove = ['IMPRIMIR(0). ENVIAR. TAGS.', '(Em actualização) - ']
     for elem in to_remove:
         text = text.replace(elem, '')
 
@@ -110,7 +110,7 @@ def ignore_title(title):
                      'Expresso nos', 'Já pensou onde ir', 'Top 10', 'Conheça as novidades do site',
                      'Justiça seja feita', 'Revista \'Lui\' tira a roupa', 'Veja', 'Editorial', 'Sudoku (',
                      'As melhores fotografias', 'Esta é a fotografia', 'Conheça', 'Fórum:', 'GALERIA DE FOTOS',
-                     'Infografista do PÚBLICO', 'Vídeos d']
+                     'Infografista do PÚBLICO', 'Vídeos d', 'Quiz:']
 
     ignore_contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso',
                        'para a casa ir abaixo', 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso',
@@ -140,3 +140,13 @@ def ignore_title(title):
 
 def ignore_pretitle(pretitle):
     return pretitle == 'Grátis'
+
+
+def ignore_snippet(snippet):
+    ignore_contains = ['Ideias para este']
+
+    for forbidden in ignore_contains:
+        if forbidden.lower() in snippet.lower():
+            return True
+
+    return False

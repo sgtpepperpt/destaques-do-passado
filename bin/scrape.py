@@ -32,7 +32,7 @@ from src.scrapers.publico_scrapers import ScraperPublico02, ScraperPublico03, Sc
 
 from src.scrapers.news_scraper import ScraperCentral
 from src.sources import bind_source, source_name_from_file
-from src.text_util import remove_clutter, prettify_text, ignore_title, ignore_pretitle, prettify_title
+from src.text_util import remove_clutter, prettify_text, ignore_title, ignore_pretitle, prettify_title, ignore_snippet
 from src.util import *
 
 
@@ -144,6 +144,8 @@ def scrape_source(scraper, source, cursor, db_insert=True):
                 continue
 
             snippet = prettify_text(n.get('snippet'))
+            if ignore_snippet(snippet):
+                continue
 
             print('{}; {}; {} / {}; {} / {}; {}'.format(title, pretitle, snippet, category, article_source, article_url, n.get('img_url')))
 
