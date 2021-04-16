@@ -59,6 +59,18 @@ def bind_source(source_text):
     if source_text in ['Meios e Publicidade']:
         return 'Meios & Publicidade'
 
+    if source_text in ['Autosport']:
+        return 'AutoSport'
+
+    if 'tek' in source_text.lower():
+        return 'TeK'
+
+    if source_text.lower() in ['green savers', 'greensavers']:
+        return 'Green Savers'
+
+    if source_text.lower() == 'tvnet' or source_text.lower() == 'tv net':
+        return 'TVNet'
+
     return source_text
 
 
@@ -70,7 +82,8 @@ def source_name_from_file(source):
         'jn.pt': 'Jornal de Notícias',
         'expresso.pt': 'Expresso',
         'dn.pt': 'Diário de Notícias',
-        'aeiou.pt': 'AEIOU'
+        'aeiou.pt': 'AEIOU',
+        'noticias.sapo.pt': 'SAPO Notícias'
     }
 
     return sources[source]

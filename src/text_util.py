@@ -12,7 +12,8 @@ def remove_clutter(text):
     to_remove = ['(em actualização)', '(em atualização)', '(actualização)', '(atualização)', '(actualizações)',
                  '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', '(VÍDEO)', 'PORTUGAL:', '(COM TRAILER)',
                  'EXCLUSIVO:', '(galeria de fotos)', '(com fotogaleria)', '(ouve-o aqui)', '(fotogaleria)', '(FOTOS)',
-                 '(vídeo)', '[em actualização]', '(com VÍDEO)']
+                 '(vídeo)', '[em actualização]', '(com VÍDEO)', '(vídeos)', '(ACTUALIZADA)', '-- oficial',
+                 'CORREÇÃO: ']
 
     for elem in to_remove:
         text = text.replace(elem, '')
@@ -110,7 +111,8 @@ def ignore_title(title):
                      'Expresso nos', 'Já pensou onde ir', 'Top 10', 'Conheça as novidades do site',
                      'Justiça seja feita', 'Revista \'Lui\' tira a roupa', 'Veja', 'Editorial', 'Sudoku (',
                      'As melhores fotografias', 'Esta é a fotografia', 'Conheça', 'Fórum:', 'GALERIA DE FOTOS',
-                     'Infografista do PÚBLICO', 'Vídeos d', 'Quiz:']
+                     'Infografista do PÚBLICO', 'Vídeos d', 'Quiz:', 'Gráfico animado', 'Guia para', 'SAPO dá',
+                     'SAPO renova', 'Mitrologia: ']
 
     ignore_contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso',
                        'para a casa ir abaixo', 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso',
@@ -119,12 +121,18 @@ def ignore_title(title):
 
     allows = ['Sorteio da Liga', 'Sorteio dos quartos', 'Sorteio da Superliga']
 
+    exact = ['Estreia']
+
     for forbidden in ignore_starts:
         if title.lower().startswith(forbidden.lower()):
             return True
 
     for forbidden in ignore_contains:
         if forbidden.lower() in title.lower() and forbidden.lower() not in allows:
+            return True
+
+    for forbidden in exact:
+        if title.lower().startswith(forbidden.lower()):
             return True
 
     # ignore if the title starts with a date/time
@@ -139,10 +147,14 @@ def ignore_title(title):
 
 
 def ignore_pretitle(pretitle):
-    return pretitle == 'Grátis'
+    return pretitle in ['Grátis', 'Passatempo', 'Editorial', 'Projecto DN']
 
 
 def ignore_snippet(snippet):
+    # if no snippet, don't ignore article because of it
+    if not snippet:
+        return False
+
     ignore_contains = ['Ideias para este']
 
     for forbidden in ignore_contains:

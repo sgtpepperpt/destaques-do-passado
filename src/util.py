@@ -113,6 +113,16 @@ def remove_destaques_uniqueness(url):
     return match[0] if len(match) > 0 else url
 
 
+def is_after(first, element):
+    previous = element.previous
+    while previous:
+        if previous == first and previous.sourceline == first.sourceline:  # if two elements are equal but not the same it would return true
+            return True
+        else:
+            previous = previous.previous
+    return False
+
+
 def is_between(first, last, element):
     next = first
     while next and next != last:
@@ -120,6 +130,16 @@ def is_between(first, last, element):
             return True
         else:
             next = next.next
+    return False
+
+
+def is_between_nonrecursive(first, last, element):
+    next = first
+    while next and next != last:
+        if next == element:
+            return True
+        else:
+            next = next.next_sibling
     return False
 
 
