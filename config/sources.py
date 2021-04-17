@@ -116,12 +116,30 @@ news_sources = [
     {
         'site': 'noticias.sapo.pt',
         'ignore': [
-            '20020802101821', '20050212045123'  # empty/wrong
+            '20020802101821', '20050212045123',  # empty/wrong
             '20070225131122-20080222185009'  # seems like it's not archived
         ],
         'encoding': {
              '20051027031535-20070217132649': 'utf-8'
         },
+    },
+    {
+        # "independent" era
+        'site': 'diariodigital.pt',
+        'from': 20010301220302,  # error pages before
+        'to': 20031027120557,
+        'ignore': [
+            '20020720131716',  # empty
+        ]
+    },
+    {
+        # sapo era
+        'site': 'diariodigital.sapo.pt',
+        'from': 20031213054017,
+        'ignore': [
+            '20050712082156', '20070611173339', '20071006042355', '20080213190631-20081022053150', '20081022061528',  # redirect to sapo pesquisa
+        ],
+        'target': 'diariodigital.pt'
     },
     {'site': 'tsf.pt'},
     {'site': 'ultimahora.publico.pt'},
@@ -129,7 +147,6 @@ news_sources = [
 
     {'site': 'iol.pt'},
     {'site': 'sicnoticias.sapo.pt'},
-    {'site': 'diariodigital.pt'},
     {'site': 'rtp.pt'},
     {'site': 'visao.sapo.pt'},
     {'site': 'sol.sapo.pt'},

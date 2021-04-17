@@ -83,7 +83,8 @@ def source_name_from_file(source):
         'expresso.pt': 'Expresso',
         'dn.pt': 'Diário de Notícias',
         'aeiou.pt': 'AEIOU',
-        'noticias.sapo.pt': 'SAPO Notícias'
+        'noticias.sapo.pt': 'SAPO Notícias',
+        'diariodigital.pt': 'Diário Digital'
     }
 
     return sources[source]

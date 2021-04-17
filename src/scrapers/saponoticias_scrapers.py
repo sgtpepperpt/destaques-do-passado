@@ -796,7 +796,7 @@ class ScraperSapoNoticias09(NewsScraper):
 
 class ScraperSapoNoticias10(NewsScraper):
     source = 'noticias.sapo.pt'
-    cutoff = 20200930170207  # might work past this, not tested TODO
+    cutoff = 20151112224517  # might work past this, not tested
 
     def scrape_page(self, soup):
         all_news = []

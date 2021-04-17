@@ -13,7 +13,7 @@ def remove_clutter(text):
                  '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', '(VÍDEO)', 'PORTUGAL:', '(COM TRAILER)',
                  'EXCLUSIVO:', '(galeria de fotos)', '(com fotogaleria)', '(ouve-o aqui)', '(fotogaleria)', '(FOTOS)',
                  '(vídeo)', '[em actualização]', '(com VÍDEO)', '(vídeos)', '(ACTUALIZADA)', '-- oficial',
-                 'CORREÇÃO: ']
+                 'CORREÇÃO: ', ' - jornal']
 
     for elem in to_remove:
         text = text.replace(elem, '')
@@ -112,7 +112,7 @@ def ignore_title(title):
                      'Justiça seja feita', 'Revista \'Lui\' tira a roupa', 'Veja', 'Editorial', 'Sudoku (',
                      'As melhores fotografias', 'Esta é a fotografia', 'Conheça', 'Fórum:', 'GALERIA DE FOTOS',
                      'Infografista do PÚBLICO', 'Vídeos d', 'Quiz:', 'Gráfico animado', 'Guia para', 'SAPO dá',
-                     'SAPO renova', 'Mitrologia: ']
+                     'SAPO renova', 'Mitrologia: ', 'Passatempo: ', 'Diário Digital muda']
 
     ignore_contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso',
                        'para a casa ir abaixo', 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso',

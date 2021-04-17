@@ -9,6 +9,8 @@ from src.scrapers.aeiou_scrapers import ScraperAeiou01, ScraperAeiou02, ScraperA
     ScraperAeiou06
 
 from src.scrapers.diariodenoticias_dummy import DummyDiarioDeNoticias01, DummyDiarioDeNoticias03
+from src.scrapers.diariodigital_scrapers import ScraperDiarioDigital01, ScraperDiarioDigital02, ScraperDiarioDigital03, \
+    ScraperDiarioDigital04, ScraperDiarioDigital05
 from src.scrapers.jornaldenoticias_dummy import DummyJornalDeNoticias01, DummyJornalDeNoticias07
 from src.scrapers.publico_dummy import DummyPublico01
 
@@ -99,7 +101,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         actual_url = decode_url(elems[2]) if len(elems) > 2 else None
 
         # TODO dev only
-        # if int(date) < 20101220160213:
+        # if int(date) < 20120131160244:
         #     continue
 
         with open(file) as f:
@@ -258,6 +260,11 @@ def main():
     scraper.register_scraper(ScraperSapoNoticias08)
     scraper.register_scraper(ScraperSapoNoticias09)
     scraper.register_scraper(ScraperSapoNoticias10)
+    scraper.register_scraper(ScraperDiarioDigital01)
+    scraper.register_scraper(ScraperDiarioDigital02)
+    scraper.register_scraper(ScraperDiarioDigital03)
+    scraper.register_scraper(ScraperDiarioDigital04)
+    scraper.register_scraper(ScraperDiarioDigital05)
 
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
@@ -268,6 +275,7 @@ def main():
     scrape_source(scraper, 'dn.pt', cursor)
     scrape_source(scraper, 'aeiou.pt', cursor)
     scrape_source(scraper, 'noticias.sapo.pt', cursor)
+    scrape_source(scraper, 'diariodigital.pt', cursor)
 
     # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)
