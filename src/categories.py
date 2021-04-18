@@ -43,7 +43,7 @@ category_bindings = {
     ('Educação', 'Ranking das escolas', 'Ensino'): Category.EDUCATION,
     ('Tecnologia', 'Ciência/tecnologia', 'Ciência e tecnologia', 'Internet', 'Computadores', 'Informática',
      'Tecnologia e Ciência', 'Tecnolologia', 'Hardware', 'Multimedia', 'Informática e Multimédia',
-     'Multimédia'): Category.TECHNOLOGY,
+     'Multimédia', 'Media e Tecnologia'): Category.TECHNOLOGY,
     ('Sociedade', 'Grande Plano', 'Tema da semana', 'Polícia', 'Gente', 'Vidas', 'Vida', 'Fotogalerias', 'Dossiês',
      'Dossiê', 'Alertas Expresso', 'Dossies Actualidade', 'Religião', 'Moda'): Category.SOCIETY,
     ('Local', 'Local Lisboa', 'Grande Porto', 'Grande Lisboa', 'Grande Lsiboa', 'Porto 2001', 'Regional', 'Lisboa',
@@ -51,7 +51,7 @@ category_bindings = {
     ('Ambiente', 'Ecosfera', 'DN + EDP na Cimeira do Clima', 'Cimeira do Clima', 'Biodiversidade', 'Clima'): Category.ENVIRONMENT,
     ('Opinião', 'Análise', 'Crónica', 'Opiniao'): Category.OPINION,
     ('Acredite se quiser', 'Esta é boca', 'Mundo Insólito', 'Pausa para Café', 'Insólito'): Category.UNUSUAL,
-    ('Outras', 'Mais Lidas', 'Pessoas'): Category.MISC
+    ('Outras', 'Mais Lidas', 'Pessoas', 'Media'): Category.MISC
 }
 
 

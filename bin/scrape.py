@@ -31,6 +31,8 @@ from src.scrapers.portugaldiario_scrapers import ScraperPortugalDiario01, Scrape
     ScraperPortugalDiario03, ScraperPortugalDiario04, ScraperPortugalDiario05, ScraperPortugalDiario06
 from src.scrapers.publico_scrapers import ScraperPublico02, ScraperPublico03, ScraperPublico04, ScraperPublico05, \
     ScraperPublico06, ScraperPublico07, ScraperPublico08
+from src.scrapers.publico_ultimahora_scrapers import ScraperPublicoUltimaHora01, ScraperPublicoUltimaHora02, \
+    ScraperPublicoUltimaHora03, ScraperPublicoUltimaHora04, ScraperPublicoUltimaHora05
 from src.scrapers.saponoticias_dummy import DummySapoNoticias01
 from src.scrapers.saponoticias_scrapers import ScraperSapoNoticias02, ScraperSapoNoticias03, ScraperSapoNoticias04, \
     ScraperSapoNoticias05, ScraperSapoNoticias06, ScraperSapoNoticias07, ScraperSapoNoticias08, ScraperSapoNoticias09, \
@@ -103,17 +105,17 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         actual_url = decode_url(elems[2]) if len(elems) > 2 else None
 
         # TODO dev only
-        # if int(date) < 20150908201302:
+        # if int(date) < 20090525035109:
         #     continue
 
         with open(file) as f:
             content = f.read()
 
-        news = scraper.scrape_page(source, date, content)
+        news, minimum_news = scraper.scrape_page(source, date, content)
         if news is None:  # ignore dummy scrapers
             continue
 
-        if len(news) < 3:  # useful to detect when a parser stops working
+        if len(news) < minimum_news:  # useful to detect when a parser stops working
             raise Exception('So few news here!')
 
         source_url = actual_url or source
@@ -277,6 +279,11 @@ def main():
     scraper.register_scraper(ScraperTSF08)
     scraper.register_scraper(ScraperTSF09)
     scraper.register_scraper(ScraperTSF10)
+    scraper.register_scraper(ScraperPublicoUltimaHora01)
+    scraper.register_scraper(ScraperPublicoUltimaHora02)
+    scraper.register_scraper(ScraperPublicoUltimaHora03)
+    scraper.register_scraper(ScraperPublicoUltimaHora04)
+    scraper.register_scraper(ScraperPublicoUltimaHora05)
 
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
@@ -289,6 +296,7 @@ def main():
     scrape_source(scraper, 'noticias.sapo.pt', cursor)
     scrape_source(scraper, 'diariodigital.pt', cursor)
     scrape_source(scraper, 'tsf.pt', cursor)
+    scrape_source(scraper, 'ultimahora.publico.pt', cursor)
 
     # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)

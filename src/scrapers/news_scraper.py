@@ -25,7 +25,7 @@ class ScraperCentral:
         for scraper in self.__scrapers[source]:
             if scraper.is_admissible(date):
                 soup = BeautifulSoup(page_content, 'html.parser')
-                return scraper.scrape_page(soup)
+                return scraper.scrape_page(soup), (scraper.minimum_news if hasattr(scraper, 'minimum_news') else 3)
 
         raise Exception('Scraper not defined!')
 

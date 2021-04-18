@@ -117,7 +117,8 @@ def ignore_title(title):
     ignore_contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso',
                        'para a casa ir abaixo', 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso',
                        'A primeira página do', 'a Revista E', 'A grande revista sobre o Benfica campeão',
-                       'notícias + lidas', 'Portal AEIOU', 'mulheres da vida de', 'adivinhe']
+                       'notícias + lidas', 'Portal AEIOU', 'mulheres da vida de', 'adivinhe', 'sugestão do PÚBLICO',
+                       'sugestões do PÚBLICO']
 
     allows = ['Sorteio da Liga', 'Sorteio dos quartos', 'Sorteio da Superliga']
 
@@ -147,7 +148,7 @@ def ignore_title(title):
 
 
 def ignore_pretitle(pretitle):
-    return pretitle in ['Grátis', 'Passatempo', 'Editorial', 'Projecto DN']
+    return pretitle in ['Grátis', 'Passatempo', 'Editorial', 'Projecto DN', 'Artigo de opinião']
 
 
 def ignore_snippet(snippet):

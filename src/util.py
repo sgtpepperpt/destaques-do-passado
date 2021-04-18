@@ -155,6 +155,10 @@ def get_direct_strings(elem):
     return remove_clutter(' '.join([e for e in elem.contents if isinstance(e, NavigableString) and not isinstance(e, Comment)]))
 
 
+def get_direct_strings_between(elem, start_elem, end_elem):
+    return remove_clutter(' '.join([e for e in elem.contents if isinstance(e, NavigableString) and not isinstance(e, Comment) and is_between(start_elem, end_elem, e)]))
+
+
 def encode_url(url):
     # encode url to save as filename
     return url.replace(':', '*').replace('/', '|').replace('-', '$')

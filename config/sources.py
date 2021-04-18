@@ -181,7 +181,27 @@ news_sources = [
             '20110520012522', '20110621155548', '20120126082845'
         ]
     },
-    {'site': 'ultimahora.publico.pt'},
+    {
+        'site': 'ultimahora.publico.pt',
+        'to': 20090925042626,  # redirects to main publico thereafter
+        'ignore': [
+            # below
+            '19991127135635-20001018231646'
+        ]
+    },
+    {
+        'site': 'http://ultimahora.publico.pt:80',
+        'path': '/geral.htm',
+        'target': 'ultimahora.publico.pt',
+        'to': 20001019034116
+    },
+    {
+        # first frame of same page
+        'site': 'http://ultimahora.publico.pt:80',
+        'path': '/barra-central.asp',
+        'target': 'ultimahora.publico.pt',
+        'to': 20001019034116
+    },
 
     {'site': 'sabado.pt'},
     {'site': 'iol.pt'},

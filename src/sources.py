@@ -77,7 +77,7 @@ def bind_source(source_text):
 def source_name_from_file(source):
     sources = {
         'publico.pt': 'Público',
-        'ultimahorapublico.pt': 'Público',
+        'ultimahora.publico.pt': 'Público',
         'portugaldiario.iol.pt': 'Portugal Diário',
         'jn.pt': 'Jornal de Notícias',
         'expresso.pt': 'Expresso',
