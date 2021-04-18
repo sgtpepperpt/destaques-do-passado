@@ -1,11 +1,8 @@
 import re
 
-from bs4 import NavigableString, Comment
+from bs4 import NavigableString
 
-from src.categories import bind_category
-from src.util import generate_dummy_url, get_direct_strings, find_comments, find_comments_regex, is_between, \
-    is_between_nonrecursive, is_after, generate_destaques_uniqueness
-from src.text_util import remove_clutter, clean_special_chars, prettify_text, ignore_title, clean_spacing
+from src.util import generate_dummy_url, get_direct_strings, find_comments, generate_destaques_uniqueness
 
 from src.scrapers.news_scraper import NewsScraper, Importance
 

@@ -13,7 +13,7 @@ def remove_clutter(text):
                  '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', '(VÍDEO)', 'PORTUGAL:', '(COM TRAILER)',
                  'EXCLUSIVO:', '(galeria de fotos)', '(com fotogaleria)', '(ouve-o aqui)', '(fotogaleria)', '(FOTOS)',
                  '(vídeo)', '[em actualização]', '(com VÍDEO)', '(vídeos)', '(ACTUALIZADA)', '-- oficial',
-                 'CORREÇÃO: ', ' - jornal']
+                 'CORREÇÃO: ', ' - jornal', '(actual)']
 
     for elem in to_remove:
         text = text.replace(elem, '')

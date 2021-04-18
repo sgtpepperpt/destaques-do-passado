@@ -5,15 +5,16 @@ import sqlite3
 import requests
 
 from src.categories import bind_category
+
+from src.scrapers.news_scraper import ScraperCentral
+
 from src.scrapers.aeiou_scrapers import ScraperAeiou01, ScraperAeiou02, ScraperAeiou03, ScraperAeiou04, ScraperAeiou05, \
     ScraperAeiou06
-
 from src.scrapers.diariodenoticias_dummy import DummyDiarioDeNoticias01, DummyDiarioDeNoticias03
 from src.scrapers.diariodigital_scrapers import ScraperDiarioDigital01, ScraperDiarioDigital02, ScraperDiarioDigital03, \
     ScraperDiarioDigital04, ScraperDiarioDigital05
 from src.scrapers.jornaldenoticias_dummy import DummyJornalDeNoticias01, DummyJornalDeNoticias07
 from src.scrapers.publico_dummy import DummyPublico01
-
 from src.scrapers.diariodenoticias_scrapers import ScraperDiarioDeNoticias02, ScraperDiarioDeNoticias04, \
     ScraperDiarioDeNoticias05, ScraperDiarioDeNoticias06, ScraperDiarioDeNoticias07
 from src.scrapers.expresso_scrapers import ScraperExpresso01, ScraperExpresso02, ScraperExpresso03, ScraperExpresso04, \
@@ -30,15 +31,16 @@ from src.scrapers.portugaldiario_scrapers import ScraperPortugalDiario01, Scrape
     ScraperPortugalDiario03, ScraperPortugalDiario04, ScraperPortugalDiario05, ScraperPortugalDiario06
 from src.scrapers.publico_scrapers import ScraperPublico02, ScraperPublico03, ScraperPublico04, ScraperPublico05, \
     ScraperPublico06, ScraperPublico07, ScraperPublico08
-
-
-from src.scrapers.news_scraper import ScraperCentral
 from src.scrapers.saponoticias_dummy import DummySapoNoticias01
 from src.scrapers.saponoticias_scrapers import ScraperSapoNoticias02, ScraperSapoNoticias03, ScraperSapoNoticias04, \
     ScraperSapoNoticias05, ScraperSapoNoticias06, ScraperSapoNoticias07, ScraperSapoNoticias08, ScraperSapoNoticias09, \
     ScraperSapoNoticias10
+from src.scrapers.tsf_dummy import DummyTSF01
+from src.scrapers.tsf_scrapers import ScraperTSF02, ScraperTSF03, ScraperTSF04, ScraperTSF05, ScraperTSF06, \
+    ScraperTSF07, ScraperTSF08, ScraperTSF09, ScraperTSF10
+
 from src.sources import bind_source, source_name_from_file
-from src.text_util import remove_clutter, prettify_text, ignore_title, ignore_pretitle, prettify_title, ignore_snippet
+from src.text_util import prettify_text, ignore_title, ignore_pretitle, prettify_title, ignore_snippet
 from src.util import *
 
 
@@ -101,7 +103,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         actual_url = decode_url(elems[2]) if len(elems) > 2 else None
 
         # TODO dev only
-        # if int(date) < 20120131160244:
+        # if int(date) < 20150908201302:
         #     continue
 
         with open(file) as f:
@@ -145,7 +147,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
             if ignore_title(title):
                 continue
 
-            pretitle = prettify_title(n.get('headline'))
+            pretitle = prettify_title(n.get('headline') or n.get('pretitle'))
             if ignore_pretitle(pretitle):
                 continue
 
@@ -265,6 +267,16 @@ def main():
     scraper.register_scraper(ScraperDiarioDigital03)
     scraper.register_scraper(ScraperDiarioDigital04)
     scraper.register_scraper(ScraperDiarioDigital05)
+    scraper.register_scraper(DummyTSF01)
+    scraper.register_scraper(ScraperTSF02)
+    scraper.register_scraper(ScraperTSF03)
+    scraper.register_scraper(ScraperTSF04)
+    scraper.register_scraper(ScraperTSF05)
+    scraper.register_scraper(ScraperTSF06)
+    scraper.register_scraper(ScraperTSF07)
+    scraper.register_scraper(ScraperTSF08)
+    scraper.register_scraper(ScraperTSF09)
+    scraper.register_scraper(ScraperTSF10)
 
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
@@ -276,6 +288,7 @@ def main():
     scrape_source(scraper, 'aeiou.pt', cursor)
     scrape_source(scraper, 'noticias.sapo.pt', cursor)
     scrape_source(scraper, 'diariodigital.pt', cursor)
+    scrape_source(scraper, 'tsf.pt', cursor)
 
     # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)

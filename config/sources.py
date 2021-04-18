@@ -141,10 +141,49 @@ news_sources = [
         ],
         'target': 'diariodigital.pt'
     },
-    {'site': 'tsf.pt'},
+    {
+        'site': 'tsf.pt',
+        'to': 20080314173841,
+        'ignore': [
+            '20001204045200',  # error
+            '20020402122419',  # redirects
+            '20020802231431-20080319163335',  # lusomundo version below
+        ]
+    },
+    {
+        'site': 'http://www.tsf.pt:80',
+        'path': '/especial_portugal_aut.asp',
+        'target': 'tsf.pt',
+        'from': 20011228150549,
+        'to': 20011228150549
+    },
+    {
+        'site': 'http://www.tsf.pt:80',
+        'path': '/online/primeira/default.asp',
+        'target': 'tsf.pt',
+        'from': 20020802231431,
+        'to': 20080314173841,
+        'ignore': [
+            # empty pages
+            '20041114052014-20041116010600', '20050213011222', '20050604024827', '20050627014838', '20050629005259',
+            '20050901033111', '20050901071740', '20051031084636', '20051125024744', '20070202022827', '20070822233328',
+            '20071212170455'
+        ]
+    },
+    {
+        'site': 'http://www.tsf.pt',
+        'path': '/paginainicial',
+        'target': 'tsf.pt',
+        'from': 20080523145202,
+        'ignore': [
+            # errors
+            '20091218192658', '20100805222602', '20110128061743', '20110621151454', '20120922151553', '20110128073836',
+            '20110520012522', '20110621155548', '20120126082845'
+        ]
+    },
     {'site': 'ultimahora.publico.pt'},
-    {'site': 'sabado.pt'},
 
+    {'site': 'sabado.pt'},
     {'site': 'iol.pt'},
     {'site': 'sicnoticias.sapo.pt'},
     {'site': 'rtp.pt'},

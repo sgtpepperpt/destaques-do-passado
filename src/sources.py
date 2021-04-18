@@ -17,7 +17,7 @@ def bind_source(source_text):
     if source_text.startswith('Diário Economico'):
         return 'Diário Económico'
 
-    if source_text.startswith('TSF'):
+    if source_text.lower().startswith('tsf'):
         return 'TSF'
 
     if source_text.startswith('Visão'):
@@ -84,7 +84,8 @@ def source_name_from_file(source):
         'dn.pt': 'Diário de Notícias',
         'aeiou.pt': 'AEIOU',
         'noticias.sapo.pt': 'SAPO Notícias',
-        'diariodigital.pt': 'Diário Digital'
+        'diariodigital.pt': 'Diário Digital',
+        'tsf.pt': 'TSF'
     }
 
     return sources[source]
