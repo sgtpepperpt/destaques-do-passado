@@ -202,11 +202,29 @@ news_sources = [
         'target': 'ultimahora.publico.pt',
         'to': 20001019034116
     },
+    {
+        'site': 'rtp.pt',
+        'from': 20020913142313,  # no news before
+        'to': 20110622110305,  # rest below
+        'ignore': [
+            # emptys
+            '20051010032047', '20060122225052', '20060701155347'
+        ]
+    },
+    {
+        'site': 'rtp.pt',
+        'path': '/homepage',
+        'target': 'rtp.pt',
+        'from': 20110622110305,
+        'ignore': [
+            # redirect
+            '20151004192415'
+        ]
+    },
 
     {'site': 'sabado.pt'},
     {'site': 'iol.pt'},
     {'site': 'sicnoticias.sapo.pt'},
-    {'site': 'rtp.pt'},
     {'site': 'visao.sapo.pt'},
     {'site': 'sol.sapo.pt'},
     {'site': 'tvi24.iol.pt'},

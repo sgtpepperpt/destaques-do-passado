@@ -25,16 +25,17 @@ class Category(Enum):
 category_bindings = {
     ('Notícias do dia', 'Mais notícias principais', 'Notícias principais', 'Principais notícias', 'Últimas notícias',
      'Destaque', 'Última hora', 'Outras', '1ª Página', 'Em foco', 'Foco', 'Última', 'Útimas notícias', 'Últimas',
-     'Actualidade', 'Destaques', 'Genérico', 'emfoco', 'Atualidade', 'Primeira', 'Geral'): Category.GENERIC,
+     'Actualidade', 'Destaques', 'Genérico', 'emfoco', 'Atualidade', 'Primeira', 'Geral', 'Especiais'): Category.GENERIC,
     ('Portugal', 'País', 'Nacional', 'Nacionais', 'Justiça', 'Segurança'): Category.NATIONAL,
     ('Mundo', 'Internacional', 'Europa', 'Enviados', 'África', 'Globo', 'Eleições em Espanha', 'Internacionais',
      'Comunidades Lusófonas', 'Lusofonia'): Category.WORLD,
     ('Desporto', 'Esportes', 'Euro 2004', 'Euro2016', 'Resultados', 'Relvado', 'Futebol', 'Mundial2010', 'Mundial',
-     'Mundial 2010', 'Ténis', 'Euro 2012', 'Primeira Liga', 'Liga dos Campeões', 'Liga Europa', 'Euro2004'): Category.SPORTS,
+     'Mundial 2010', 'Ténis', 'Euro 2012', 'Primeira Liga', 'Liga dos Campeões', 'Liga Europa', 'Euro2004',
+     'Futebol Nacional', 'Futebol Internacional', 'Outras Modalidades'): Category.SPORTS,
     ('Negócios', 'Economia', 'Economia & Internacional', 'Dinheiro', 'Dinheiro Vivo', 'Salário Mínimo', 'Caso Banif',
      'negocios', 'Banca', 'Economa'): Category.BUSINESS,
     ('Entretenimento', 'Música', 'Cinema', 'Palco', 'Televisão', 'Arte e média', 'Star Wars', 'Lazer', 'Ócios',
-     'Festival', 'Jogos', 'Concertos', 'Espectáculos', 'TV e Cinema'): Category.ENTERTAINMENT,
+     'Festival', 'Jogos', 'Concertos', 'Espectáculos', 'TV e Cinema', 'Artes & Espetáculos'): Category.ENTERTAINMENT,
     ('Ciência', 'Ciências', 'Ciencia', 'Nobel', 'Espaço', 'Biologia', 'Ciência e Saúde'): Category.SCIENCE,
     ('Saúde', 'Morte no Hospital de S. José', 'SNS', 'Vacinas'): Category.HEALTH,
     ('Política', 'Politica', 'Partidos', 'Governo'): Category.POLITICS,
@@ -51,7 +52,7 @@ category_bindings = {
     ('Ambiente', 'Ecosfera', 'DN + EDP na Cimeira do Clima', 'Cimeira do Clima', 'Biodiversidade', 'Clima'): Category.ENVIRONMENT,
     ('Opinião', 'Análise', 'Crónica', 'Opiniao'): Category.OPINION,
     ('Acredite se quiser', 'Esta é boca', 'Mundo Insólito', 'Pausa para Café', 'Insólito'): Category.UNUSUAL,
-    ('Outras', 'Mais Lidas', 'Pessoas', 'Media'): Category.MISC
+    ('Outras', 'Mais Lidas', 'Pessoas', 'Media', 'Média', 'Especial Informação'): Category.MISC
 }
 
 

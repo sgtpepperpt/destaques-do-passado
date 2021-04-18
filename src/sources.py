@@ -85,7 +85,8 @@ def source_name_from_file(source):
         'aeiou.pt': 'AEIOU',
         'noticias.sapo.pt': 'SAPO Notícias',
         'diariodigital.pt': 'Diário Digital',
-        'tsf.pt': 'TSF'
+        'tsf.pt': 'TSF',
+        'rtp.pt': 'RTP'
     }
 
     return sources[source]
