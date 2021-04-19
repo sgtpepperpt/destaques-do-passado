@@ -5,6 +5,9 @@ def bind_source(source_text):
     if source_text.startswith('Diário de Notícias') or source_text in ['DN']:  # google news has Diário de Notícias - Lisboa
         return 'Diário de Notícias'
 
+    if source_text.startswith('Jornal de Notícias') or source_text in ['JN Mobile']:
+        return 'Jornal de Notícias'
+
     if source_text.startswith('Jornal de Negócios'):
         return 'Jornal de Negócios'
 
@@ -20,8 +23,20 @@ def bind_source(source_text):
     if source_text.lower().startswith('tsf'):
         return 'TSF'
 
+    if source_text.lower().startswith('Expresso ('):
+        return 'Expresso'
+
+    if source_text.lower().startswith('Impala'):
+        return 'Impala'
+
+    if source_text.lower().startswith('euronews'):
+        return 'EuroNews'
+
     if source_text.startswith('Visão'):
         return 'Visão'
+
+    if source_text.startswith('Renascença'):
+        return 'Rádio Renascença'
 
     if source_text.lower().startswith('blitz'):
         return 'BLITZ'
@@ -37,6 +52,9 @@ def bind_source(source_text):
 
     if source_text in ['ABola']:
         return 'A Bola'
+
+    if source_text in ['musicnet']:
+        return 'Music.Net'
 
     if source_text in ['Exame Informatica']:
         return 'Exame Informática'
@@ -86,7 +104,8 @@ def source_name_from_file(source):
         'noticias.sapo.pt': 'SAPO Notícias',
         'diariodigital.pt': 'Diário Digital',
         'tsf.pt': 'TSF',
-        'rtp.pt': 'RTP'
+        'rtp.pt': 'RTP',
+        'noticias.rtp.pt': 'RTP'
     }
 
     return sources[source]

@@ -33,6 +33,8 @@ from src.scrapers.publico_scrapers import ScraperPublico02, ScraperPublico03, Sc
     ScraperPublico06, ScraperPublico07, ScraperPublico08
 from src.scrapers.publico_ultimahora_scrapers import ScraperPublicoUltimaHora01, ScraperPublicoUltimaHora02, \
     ScraperPublicoUltimaHora03, ScraperPublicoUltimaHora04, ScraperPublicoUltimaHora05
+from src.scrapers.rtp_noticias_scrapers import ScraperRtpNoticias01, ScraperRtpNoticias02, ScraperRtpNoticias03, \
+    ScraperRtpNoticias04, ScraperRtpNoticias05, ScraperRtpNoticias06
 from src.scrapers.rtp_scrapers import ScraperRtp01, ScraperRtp02, ScraperRtp03, ScraperRtp04, ScraperRtp05, ScraperRtp06
 from src.scrapers.saponoticias_dummy import DummySapoNoticias01
 from src.scrapers.saponoticias_scrapers import ScraperSapoNoticias02, ScraperSapoNoticias03, ScraperSapoNoticias04, \
@@ -105,8 +107,8 @@ def scrape_source(scraper, source, cursor, db_insert=True):
         is_https = elems[1] == 's'
         actual_url = decode_url(elems[2]) if len(elems) > 2 else None
 
-        # TODO dev only
-        # if int(date) < 20110909151927:
+        # dev only
+        # if int(date) < 20150709170240:
         #     continue
 
         with open(file) as f:
@@ -291,6 +293,12 @@ def main():
     scraper.register_scraper(ScraperRtp04)
     scraper.register_scraper(ScraperRtp05)
     scraper.register_scraper(ScraperRtp06)
+    scraper.register_scraper(ScraperRtpNoticias01)
+    scraper.register_scraper(ScraperRtpNoticias02)
+    scraper.register_scraper(ScraperRtpNoticias03)
+    scraper.register_scraper(ScraperRtpNoticias04)
+    scraper.register_scraper(ScraperRtpNoticias05)
+    scraper.register_scraper(ScraperRtpNoticias06)
 
     # get scraping
     scrape_source(scraper, 'news.google.pt', cursor)
@@ -305,6 +313,7 @@ def main():
     scrape_source(scraper, 'tsf.pt', cursor)
     scrape_source(scraper, 'ultimahora.publico.pt', cursor)
     scrape_source(scraper, 'rtp.pt', cursor)
+    scrape_source(scraper, 'noticias.rtp.pt', cursor)
 
     # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)

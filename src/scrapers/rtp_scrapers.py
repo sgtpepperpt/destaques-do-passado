@@ -11,8 +11,10 @@ from src.scrapers.news_scraper import NewsScraper, Importance
 
 
 def red_extract_feature(all_news, main_article):
-    title_elem = main_article.find('a', class_='titulo') or main_article.find('font', class_='titulo').find_parent('a')
+    title_elem = main_article.find('a', class_='titulo') or main_article.find('font', class_='titulo').find_parent('a') or main_article.find('font', class_='titulo').find('a')
+
     snippet_elem = main_article.find(re.compile(r'^(td|font)$'), class_='abertura')
+    snippet = snippet_elem.get_text() if snippet_elem else None
 
     img_elems = [e for e in main_article.find_all('img') if not e.get('src').lower().endswith('.gif') and e.get('alt')]
     img_url = img_elems[0].get('src') if len(img_elems) > 0 else None
@@ -20,7 +22,7 @@ def red_extract_feature(all_news, main_article):
     all_news.append({
         'article_url': title_elem.get('href'),
         'title': title_elem.get_text(),
-        'snippet': snippet_elem.get_text(),
+        'snippet': snippet,
         'img_url': img_url,
         'category': 'Destaques',
         'importance': Importance.FEATURE
@@ -86,46 +88,36 @@ def red_extract_smaller(all_news, soup):
         })
 
 
-class ScraperRtp01(NewsScraper):
-    source = 'rtp.pt'
-    cutoff = 20040328075115
+def red_scraper(soup):
+    all_news = []
 
-    # red site
+    # test for small red version and large one
+    large_version = False
+    main_article = find_comments(soup, ' DESTAQUE PRINCIPAL HP')
+    if len(main_article) > 0:
+        main_article = main_article[0].find_next_sibling('table')
+    else:
+        main_article = find_comments_regex(soup, r' DESTAQUE PRINCIPAL \* [A-Z]* ')[0].find_next_sibling('table')
+        large_version = True
 
-    def scrape_page(self, soup):
-        all_news = []
+    red_extract_feature(all_news, main_article)
 
-        # test for small red version and large one
-        largeVersion = False
-        main_article = find_comments(soup, ' DESTAQUE PRINCIPAL HP')
-        if len(main_article) > 0:
-            main_article = main_article[0].find_next_sibling('table')
-        else:
-            main_article = find_comments_regex(soup, r' DESTAQUE PRINCIPAL \* [A-Z]* ')[0].find_next_sibling('table')
-            largeVersion = True
+    # important to keep extraction order in case of repeated smaller version of article (only first is kept),
+    # so don't put this at the if above
+    if large_version:
+        red_extract_large(all_news, soup)
+        red_extract_smaller(all_news, soup)
 
-        red_extract_feature(all_news, main_article)
-
-        # important to keep extraction order in case of repeated smaller version, so don't put this at the if above
-        if largeVersion:
-            red_extract_large(all_news, soup)
-            red_extract_smaller(all_news, soup)
-
-        red_extract_latest(all_news, soup)
-
-        return all_news
+    red_extract_latest(all_news, soup)
+    return all_news
 
 
-class ScraperRtp02(NewsScraper):
-    source = 'rtp.pt'
-    cutoff = 20080401044447
+def modern_scraper(soup):
+    all_news = []
 
-    # more modern, "not a lot of news" site
-
-    def scrape_page(self, soup):
-        all_news = []
-
-        feature = soup.find('span', class_='textodestaquesLead').find_parent('td')
+    feature = soup.find('span', class_='textodestaquesLead')
+    if feature:  # because of noticias.rtp parser, whose pages don't always have this
+        feature = feature.find_parent('td')
         title_elem = feature.find('span', class_='textodestaquesLead').find('a')
         snippet_elem = feature.find('font', class_='textogeral12')
         img_elem = feature.find('img')
@@ -152,17 +144,37 @@ class ScraperRtp02(NewsScraper):
                 'importance': Importance.LARGE
             })
 
-        # get latest
-        latest_articles = soup.find_all('p', class_='textoultimas')
-        for title_elem in [e.find('a') for e in latest_articles]:
-            all_news.append({
-                'article_url': title_elem.get('href'),
-                'title': title_elem.get_text(),
-                'category': 'Destaques',
-                'importance': Importance.LATEST
-            })
+    # get latest
+    latest_articles = soup.find_all('p', class_='textoultimas')
+    for title_elem in [e.find('a') for e in latest_articles if e.find('a')]:
+        all_news.append({
+            'article_url': title_elem.get('href'),
+            'title': title_elem.get_text(),
+            'category': 'Destaques',
+            'importance': Importance.LATEST
+        })
 
-        return all_news
+    return all_news
+
+
+class ScraperRtp01(NewsScraper):
+    source = 'rtp.pt'
+    cutoff = 20040328075115
+
+    # red site
+
+    def scrape_page(self, soup):
+        return red_scraper(soup)
+
+
+class ScraperRtp02(NewsScraper):
+    source = 'rtp.pt'
+    cutoff = 20080401044447
+
+    # more modern, "not a lot of news" site
+
+    def scrape_page(self, soup):
+        return modern_scraper(soup)
 
 
 class ScraperRtp03(NewsScraper):
@@ -450,7 +462,7 @@ class ScraperRtp05(NewsScraper):
 
 class ScraperRtp06(NewsScraper):
     source = 'rtp.pt'
-    cutoff = 20200922110305
+    cutoff = 20151231180236  # not tested after this, might keep working
     minimum_news = 1  # because of 20151208180229
 
     def scrape_page(self, soup):

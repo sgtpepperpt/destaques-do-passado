@@ -31,11 +31,12 @@ category_bindings = {
      'Comunidades Lusófonas', 'Lusofonia'): Category.WORLD,
     ('Desporto', 'Esportes', 'Euro 2004', 'Euro2016', 'Resultados', 'Relvado', 'Futebol', 'Mundial2010', 'Mundial',
      'Mundial 2010', 'Ténis', 'Euro 2012', 'Primeira Liga', 'Liga dos Campeões', 'Liga Europa', 'Euro2004',
-     'Futebol Nacional', 'Futebol Internacional', 'Outras Modalidades'): Category.SPORTS,
+     'Futebol Nacional', 'Futebol Internacional', 'Outras Modalidades', 'Motores', 'Modalidades Outras'): Category.SPORTS,
     ('Negócios', 'Economia', 'Economia & Internacional', 'Dinheiro', 'Dinheiro Vivo', 'Salário Mínimo', 'Caso Banif',
      'negocios', 'Banca', 'Economa'): Category.BUSINESS,
     ('Entretenimento', 'Música', 'Cinema', 'Palco', 'Televisão', 'Arte e média', 'Star Wars', 'Lazer', 'Ócios',
-     'Festival', 'Jogos', 'Concertos', 'Espectáculos', 'TV e Cinema', 'Artes & Espetáculos'): Category.ENTERTAINMENT,
+     'Festival', 'Jogos', 'Concertos', 'Espectáculos', 'TV e Cinema', 'Artes & Espetáculos',
+     'Artes & Espectáculos'): Category.ENTERTAINMENT,
     ('Ciência', 'Ciências', 'Ciencia', 'Nobel', 'Espaço', 'Biologia', 'Ciência e Saúde'): Category.SCIENCE,
     ('Saúde', 'Morte no Hospital de S. José', 'SNS', 'Vacinas'): Category.HEALTH,
     ('Política', 'Politica', 'Partidos', 'Governo'): Category.POLITICS,
@@ -62,7 +63,7 @@ def bind_category(category_text):
         for key in k:
             cat_dict[key.lower()] = v
 
-    if category_text.lower() not in cat_dict:
+    if category_text.lower().strip() not in cat_dict:
         raise Exception('Unknown category: ' + category_text)
 
-    return cat_dict[category_text.lower()]
+    return cat_dict[category_text.lower().strip()]

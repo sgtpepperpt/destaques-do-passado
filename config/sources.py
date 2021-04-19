@@ -221,6 +221,40 @@ news_sources = [
             '20151004192415'
         ]
     },
+    {
+        'site': 'noticias.rtp.pt',
+        'to': 20071011234507,  # afterwards it's empty, or redirects to main site
+        'ignore': [
+            # no news
+            '20050511022419'
+        ]
+    },
+    {
+        'site': 'http://ww1.rtp.pt:80',
+        'path': '/noticias',
+        'from': 20071120025709,
+        'to': 20081021143915,
+
+        'target': 'noticias.rtp.pt'
+    },
+    {
+        'site': 'http://tv1.rtp.pt',
+        'path': '/noticias/index.php',
+        'from': 20090525054724,
+        'to': 20100807224837,
+
+        'target': 'noticias.rtp.pt',
+        'ignore': [
+        ]
+    },
+    {
+        'site': 'http://www.rtp.pt',
+        'path': '/noticias',
+        'from': 20110123041014,
+        'target': 'noticias.rtp.pt',
+        'ignore': [
+        ]
+    },
 
     {'site': 'sabado.pt'},
     {'site': 'iol.pt'},
