@@ -255,6 +255,24 @@ news_sources = [
         'ignore': [
         ]
     },
+    {
+        # "independent" era
+        'site': 'rr.pt',
+        'from': 20021121152747,  # before empty
+        'to': 20110520182240,
+        'ignore': [
+            # half empty
+            '20061222191611'
+        ]
+    },
+    {
+        # sapo era
+        'site': 'rr.sapo.pt',
+        'from': 20110522071227,
+        'ignore': [
+        ],
+        'target': 'rr.pt'
+    },
 
     {'site': 'sabado.pt'},
     {'site': 'iol.pt'},

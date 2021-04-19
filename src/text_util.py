@@ -112,13 +112,17 @@ def ignore_title(title):
                      'Justiça seja feita', 'Revista \'Lui\' tira a roupa', 'Veja', 'Editorial', 'Sudoku (',
                      'As melhores fotografias', 'Esta é a fotografia', 'Conheça', 'Fórum:', 'GALERIA DE FOTOS',
                      'Infografista do PÚBLICO', 'Vídeos d', 'Quiz:', 'Gráfico animado', 'Guia para', 'SAPO dá',
-                     'SAPO renova', 'Mitrologia: ', 'Passatempo: ', 'Diário Digital muda', 'A sua opinião:']
+                     'SAPO renova', 'Mitrologia: ', 'Passatempo: ', 'Diário Digital muda', 'A sua opinião:',
+                     'Renascença nomeada', 'Opinião de', 'Acha que sabe', 'Em directo:', 'Nota da Renascença',
+                     'Tem dúvidas sobre', 'Fim-de-semana de portas']
 
     ignore_contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso',
                        'para a casa ir abaixo', 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso',
                        'A primeira página do', 'a Revista E', 'A grande revista sobre o Benfica campeão',
                        'notícias + lidas', 'Portal AEIOU', 'mulheres da vida de', 'adivinhe', 'sugestão do PÚBLICO',
-                       'sugestões do PÚBLICO', 'do Cinemax', 'entrevistado quinta']
+                       'sugestões do PÚBLICO', 'do Cinemax', 'entrevistado quinta', 'novo site e nova web TV',
+                       'ganhe um', 'Renascença responde', 'Faça contas com o simulador', ' em fotos', 'saiba qua',
+                       'saiba como', 'emissão especial']
 
     allows = ['Sorteio da Liga', 'Sorteio dos quartos', 'Sorteio da Superliga']
 

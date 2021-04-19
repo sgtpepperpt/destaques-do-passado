@@ -105,7 +105,8 @@ def source_name_from_file(source):
         'diariodigital.pt': 'Diário Digital',
         'tsf.pt': 'TSF',
         'rtp.pt': 'RTP',
-        'noticias.rtp.pt': 'RTP'
+        'noticias.rtp.pt': 'RTP',
+        'rr.pt': 'Rádio Renascença'
     }
 
     return sources[source]
