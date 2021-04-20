@@ -592,7 +592,7 @@ class ScraperAeiou05(NewsScraper):
 
 class ScraperAeiou06(NewsScraper):
     source = 'aeiou.pt'
-    cutoff = 20151231180212  # not tested thereafter
+    cutoff = 20160522224329
 
     def extract_article(self, all_news, article_elem, category):
         possible_span_title = article_elem.find('span')

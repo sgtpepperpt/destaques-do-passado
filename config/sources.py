@@ -1,3 +1,11 @@
+# limit date to crawl and download snapshots
+crawl_cutoff = '20161231235959'
+
+# tolerate that a source may not have scrapers defined for a snapshot of a date after this one
+# (ie, we downloaded a snapshot but the last scraper's cutoff is before them; this is useful
+# to exhaust defined scrapers after the crawl cutoff)
+tolerance_cutoff = '20151231235959'
+
 # pages can be ignored via timestamp or range of timestamps, eg if page didn't change in consecutive days or there was a page error
 # encoding can be defined like timestamps
 news_sources = [

@@ -228,10 +228,11 @@ def extract_snippet_after(elem, after, ignore=[]):
 def get_source(source):
     if source in ['Lusa', 'Sol', 'TSF', 'TeK', 'SIC', 'GameOver', 'RTN', 'RTP', 'Time Out', 'Volante', 'Expresso',
                   'Visão', 'Naturlink', 'Pplware', 'Superstars', 'Blitz', 'Autosport', 'Tek', 'Green Savers',
-                  'Relvado', 'MAG', 'TVNet', 'TvNet', 'TV Net', 'TVNET']:
+                  'Relvado', 'MAG', 'TVNet', 'TvNet', 'TV Net', 'TVNET', 'Quero Saber']:
         return source
 
-    if source.startswith('SAPO') or source in ['Vídeos', 'Desporto', 'Cinema', 'Música', 'TV', 'Família', 'Lifestyle']:
+    if source.startswith('SAPO') or source in ['Vídeos', 'Desporto', 'Cinema', 'Música', 'TV', 'Família', 'Lifestyle',
+                                               'Saúde', 'Saborear', 'Viajar', 'Turbo']:
         return 'SAPO'
 
     return {
@@ -796,7 +797,7 @@ class ScraperSapoNoticias09(NewsScraper):
 
 class ScraperSapoNoticias10(NewsScraper):
     source = 'noticias.sapo.pt'
-    cutoff = 20151112224517  # might work past this, not tested
+    cutoff = 20160522224329
 
     def scrape_page(self, soup):
         all_news = []

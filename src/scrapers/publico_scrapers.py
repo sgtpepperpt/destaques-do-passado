@@ -555,7 +555,7 @@ class ScraperPublico07(NewsScraper):
 
 class ScraperPublico08(NewsScraper):
     source = 'publico.pt'
-    cutoff = 20151231180213  # could work past this, not tested
+    cutoff = 20160304180233
 
     all_news = []
 

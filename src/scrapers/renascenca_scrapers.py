@@ -223,7 +223,7 @@ class ScraperRenascenca04(NewsScraper):
 
 class ScraperRenascenca05(NewsScraper):
     source = 'rr.pt'
-    cutoff = 20151231180236  # might work longer, not tested
+    cutoff = 20160404170209
 
     def extract_article(self, all_news, title_elem, category, importance, generic_pretitle):
         inner_elem = title_elem.find_parent('div')

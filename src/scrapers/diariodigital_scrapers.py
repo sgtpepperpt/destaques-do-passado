@@ -415,7 +415,7 @@ class ScraperDiarioDigital04(NewsScraper):
 
 class ScraperDiarioDigital05(NewsScraper):
     source = 'diariodigital.pt'
-    cutoff = 20151231180212  # not tested past this date
+    cutoff = 20160703170211
 
     def extract_channel_news(self, all_news, channel_box, category):
         # large news

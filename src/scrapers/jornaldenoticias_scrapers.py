@@ -1451,7 +1451,7 @@ def extract_local_news(all_news, local_elems):
 
 class ScraperJornalDeNoticias10(NewsScraper):
     source = 'jn.pt'
-    cutoff = 20151201103233  # could work past this, not tested
+    cutoff = 20160128104016
 
     def scrape_page(self, soup):
         all_news = []

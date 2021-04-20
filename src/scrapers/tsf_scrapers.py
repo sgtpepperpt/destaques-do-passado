@@ -563,7 +563,7 @@ class ScraperTSF09(NewsScraper):
 
 class ScraperTSF10(NewsScraper):
     source = 'tsf.pt'
-    cutoff = 20151231204526  # might work past this, not tested
+    cutoff = 20160111214008
 
     def scrape_page(self, soup):
         all_news = []

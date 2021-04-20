@@ -1232,7 +1232,7 @@ class ScraperExpresso29(NewsScraper):
 
 class ScraperExpresso30(NewsScraper):
     source = 'expresso.pt'
-    cutoff = 20151201102835  # could work after this, haven't tested
+    cutoff = 20160719170305  # could work after this, haven't tested
 
     def scrape_page(self, soup):
         all_news = []

@@ -108,7 +108,7 @@ class ScraperGoogleNews02(NewsScraper):
 
 class ScraperGoogleNews03(NewsScraper):
     source = 'news.google.pt'
-    cutoff = 20151231180214  # we only tested up to here
+    cutoff = 20160801170210  # could work after this, haven't tested
 
     def scrape_page(self, soup):
         all_news = []

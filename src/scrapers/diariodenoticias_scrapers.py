@@ -342,7 +342,7 @@ class ScraperDiarioDeNoticias06(NewsScraper):
 
 class ScraperDiarioDeNoticias07(NewsScraper):
     source = 'dn.pt'
-    cutoff = 20151231180223  # not tested after this
+    cutoff = 20160101180225
 
     def scrape_page(self, soup):
         all_news = []

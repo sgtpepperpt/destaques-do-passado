@@ -9,7 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 from glob import glob
 
-from config.sources import news_sources
+from config.sources import news_sources, crawl_cutoff
 from src.util import is_https_link, get_actual_source, encode_url
 
 
@@ -66,7 +66,7 @@ def get_snapshot_list_cdx(source):
         'fields': 'url,timestamp',
         'filter': '!~status:4|5',
         'url': source['site'] + (source.get('path') or ''),
-        'to': source.get('to') or '20151231235959'
+        'to': source.get('to') or str(crawl_cutoff)
     }
 
     if 'from' in source:

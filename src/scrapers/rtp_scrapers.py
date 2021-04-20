@@ -462,7 +462,7 @@ class ScraperRtp05(NewsScraper):
 
 class ScraperRtp06(NewsScraper):
     source = 'rtp.pt'
-    cutoff = 20151231180236  # not tested after this, might keep working
+    cutoff = 20160117180236
     minimum_news = 1  # because of 20151208180229
 
     def scrape_page(self, soup):

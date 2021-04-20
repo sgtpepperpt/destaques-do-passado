@@ -313,7 +313,7 @@ class ScraperRtpNoticias05(NewsScraper):
 
 class ScraperRtpNoticias06(NewsScraper):
     source = 'noticias.rtp.pt'
-    cutoff = 20151231180247  # not tested after this, might keep working
+    cutoff = 20160420170950
 
     def parent_name(self, elem):
         return elem.find_parent('section').find('header').get_text()
@@ -343,12 +343,15 @@ class ScraperRtpNoticias06(NewsScraper):
             parent_name = self.parent_name(article_elem)
             importance = Importance.LATEST if 'Últimas' in parent_name else Importance.FEATURE if 'Principais' in parent_name else Importance.LARGE
 
+            url = url_elem.get('href')
+            category = 'Desporto' if 'Desporto' in parent_name else 'Opinião' if 'opiniao' in url else 'Destaques'
+
             all_news.append({
-                'article_url': url_elem.get('href'),
-                'title': title_elem.get_text(),
+                'article_url': url,
+                'title': get_direct_strings(title_elem) or title_elem.get_text(),
                 'snippet': snippet,
                 'img_url': img_url,
-                'category': 'Desporto' if 'Desporto' in parent_name else 'Destaques',
+                'category': category,
                 'importance': importance
             })
 

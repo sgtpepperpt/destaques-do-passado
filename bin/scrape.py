@@ -66,6 +66,7 @@ def check_urls(cursor):
                            (r.status_code, r.url, url))
             cursor.connection.commit()
         except Exception as e:
+            print(no_frame_url)
             print(e)
 
 
@@ -117,7 +118,7 @@ def scrape_source(scraper, source, cursor, db_insert=True):
             content = f.read()
 
         news, minimum_news = scraper.scrape_page(source, date, content)
-        if news is None:  # ignore dummy scrapers
+        if news is None:  # ignore dummy scrapers, and undefined scrapers past tolerance date
             continue
 
         if len(news) < minimum_news:  # useful to detect when a parser stops working

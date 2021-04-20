@@ -3,6 +3,8 @@ from enum import Enum
 
 from bs4 import BeautifulSoup
 
+from config.sources import tolerance_cutoff
+
 
 class Importance(str, Enum):
     FEATURE: str = 5
@@ -26,6 +28,10 @@ class ScraperCentral:
             if scraper.is_admissible(date):
                 soup = BeautifulSoup(page_content, 'html.parser')
                 return scraper.scrape_page(soup), (scraper.minimum_news if hasattr(scraper, 'minimum_news') else 3)
+
+        # there is no scraper defined for this date and source, but if we're past tolerance don't error
+        if date > tolerance_cutoff:
+            return None, 0
 
         raise Exception('Scraper not defined!')
 

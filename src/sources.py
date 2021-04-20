@@ -23,10 +23,10 @@ def bind_source(source_text):
     if source_text.lower().startswith('tsf'):
         return 'TSF'
 
-    if source_text.lower().startswith('Expresso ('):
+    if source_text.lower().startswith('expresso ('):
         return 'Expresso'
 
-    if source_text.lower().startswith('Impala'):
+    if source_text.lower().startswith('impala'):
         return 'Impala'
 
     if source_text.lower().startswith('euronews'):
