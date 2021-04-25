@@ -13,7 +13,8 @@ def remove_clutter(text):
                  '(atualizações)', '(com vídeo)', '[com vídeo]', '[vídeo]', '(VÍDEO)', 'PORTUGAL:', '(COM TRAILER)',
                  'EXCLUSIVO:', '(galeria de fotos)', '(com fotogaleria)', '(ouve-o aqui)', '(fotogaleria)', '(FOTOS)',
                  '(vídeo)', '[em actualização]', '(com VÍDEO)', '(vídeos)', '(ACTUALIZADA)', '-- oficial',
-                 'CORREÇÃO: ', ' - jornal', '(actual)', '- ACTUALIZADA']
+                 'CORREÇÃO: ', ' - jornal', '(actual)', '- ACTUALIZADA', '. Veja as fotos', '(act.)', '(em imagens)',
+                 '(Fotos)', '(act)', '(em imagens)']
 
     for elem in to_remove:
         text = text.replace(elem, '')
@@ -67,6 +68,9 @@ def prettify_text(text):
     elif text[-3:] == '...':
         had_ellipsis = True
         text = text[:-3].strip()
+    elif text[-5:] == '(...)':
+        had_ellipsis = True
+        text = text[:-5].strip()
 
     # remove period
     if text[-1] == '.':
@@ -86,7 +90,8 @@ def prettify_text(text):
         text = text.replace('PDiário:', '')
 
     # remove more clutter
-    to_remove = ['IMPRIMIR(0). ENVIAR. TAGS.', '(Em actualização) - ', '( ler artigo']
+    to_remove = ['IMPRIMIR(0). ENVIAR. TAGS.', '(Em actualização) - ', '( ler artigo',
+                 'PUB. Global Imagens. Lusa. Facebook · Twitter; Imprimir. Partilhar; Comentar.', 'IMPRIMIR(0).']
     for elem in to_remove:
         text = text.replace(elem, '')
 
@@ -114,7 +119,8 @@ def ignore_title(title):
                      'Infografista do PÚBLICO', 'Vídeos d', 'Quiz:', 'Gráfico animado', 'Guia para', 'SAPO dá',
                      'SAPO renova', 'Mitrologia: ', 'Passatempo: ', 'Diário Digital muda', 'A sua opinião:',
                      'Renascença nomeada', 'Opinião de', 'Acha que sabe', 'Em directo:', 'Nota da Renascença',
-                     'Tem dúvidas sobre', 'Fim-de-semana de portas']
+                     'Tem dúvidas sobre', 'Fim-de-semana de portas', 'Análise:', 'Os negócios da comida', 'Guia de',
+                     'Boa Cama: Termine o Verão', 'Cruzadas (']
 
     ignore_contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso',
                        'para a casa ir abaixo', 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso',
@@ -122,7 +128,7 @@ def ignore_title(title):
                        'notícias + lidas', 'Portal AEIOU', 'mulheres da vida de', 'adivinhe', 'sugestão do PÚBLICO',
                        'sugestões do PÚBLICO', 'do Cinemax', 'entrevistado quinta', 'novo site e nova web TV',
                        'ganhe um', 'Renascença responde', 'Faça contas com o simulador', ' em fotos', 'saiba qua',
-                       'saiba como', 'emissão especial']
+                       'saiba como', 'emissão especial', 'Participe', 'Nuovo video di Bin Laden']
 
     allows = ['Sorteio da Liga', 'Sorteio dos quartos', 'Sorteio da Superliga']
 

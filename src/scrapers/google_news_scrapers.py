@@ -131,7 +131,7 @@ class ScraperGoogleNews03(NewsScraper):
             snippet = story.find_next('div', class_='esc-lead-snippet-wrapper').get_text()
 
             img_elem = story.find('img', class_='esc-thumbnail-image')
-            img_url = img_elem.get('src') if img_elem else None
+            img_url = (img_elem.get('src') or img_elem.get('imgsrc')) if img_elem else None
 
             all_news.append({
                 'article_url': url,

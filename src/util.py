@@ -41,10 +41,9 @@ def make_absolute(source, timestamp, is_https, url):
         raise Exception('URL not provided')
 
     if url.startswith('//'):
-        # publico misses http sometimes
+        # at least publico and google news miss http sometimes
         # eg '//arquivo.pt/noFrame/replay/20151231180213///www.publico.pt/economia/noticia/pensoes-ate-6288-euros-aumentam-04-a-partir-de-1-de-janeiro-1718873'
-        url = 'https' + url
-        url = url.replace('///', '/')
+        url = 'https:' + url.replace('///', '/http{}://'.format('s' if is_https else ''))
 
     if url.startswith('/') and url.count('/') == 1:
         url = url[1:]  # the regex didn't recognise the slash as being the last one, instead using up the first one;

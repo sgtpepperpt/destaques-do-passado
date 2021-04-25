@@ -120,13 +120,15 @@ def modern_scraper(soup):
         feature = feature.find_parent('td')
         title_elem = feature.find('span', class_='textodestaquesLead').find('a')
         snippet_elem = feature.find('font', class_='textogeral12')
-        img_elem = feature.find('img')
+
+        img_elem = [e for e in feature.find('img') if e.find_parent('a')]
+        img_url = img_elem[0].get('src') if len(img_elem) > 0 else None
 
         all_news.append({
             'article_url': title_elem.get('href'),
             'title': title_elem.get_text(),
             'snippet': snippet_elem.get_text(),
-            'img_url': img_elem.get('src'),
+            'img_url': img_url,
             'category': 'Destaques',
             'importance': Importance.FEATURE
         })

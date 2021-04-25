@@ -13,7 +13,7 @@ def find_with_children(root, elem_name, children_name):
 
 
 def extract_large_feature(all_news, article_elem):
-    img_elem = find_with_children(article_elem, 'a', 'img')
+    img_elem = [e for e in find_with_children(article_elem, 'a', 'img') if e.find('img') and not e.find('img').get('src').endswith('azul.gif')]
 
     if len(img_elem) > 0:
         img_elem = img_elem[0].find('img')
@@ -324,7 +324,7 @@ class ScraperDiarioDigital04(NewsScraper):
 
         all_news.append({
             'article_url': title_elem.get('href') or generate_dummy_url(self.source, 'dd04', snippet, title_elem),  # no url (20100611140106)
-            'title': title_elem.get_text(),
+            'title': title_elem.get_text(separator=' '),
             'snippet': snippet,
             'img_url': img_url,
             'category': 'Destaques',

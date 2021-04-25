@@ -51,144 +51,7 @@ from src.text_util import prettify_text, ignore_title, ignore_pretitle, prettify
 from src.util import *
 
 
-def check_urls(cursor):
-    urls = cursor.execute('''SELECT url FROM urls WHERE status = 0''').fetchall()
-
-    for url in [url[0] for url in urls if not url[0].startswith('no-article-url')]:
-        # noFrame gives us the actual status code
-        # also remove the db uniqueness key
-        no_frame_url = remove_destaques_uniqueness(url.replace('arquivo.pt/wayback', 'arquivo.pt/noFrame/replay'))
-
-        try:
-            r = requests.head(no_frame_url, allow_redirects=True)
-
-            cursor.execute('UPDATE urls SET status = ?, redirect_url = ? WHERE url = ?',
-                           (r.status_code, r.url, url))
-            cursor.connection.commit()
-        except Exception as e:
-            print(no_frame_url)
-            print(e)
-
-
-def create_database(cursor):
-    cursor.execute('PRAGMA foreign_keys = ON')
-
-    cursor.execute('''CREATE TABLE IF NOT EXISTS urls (
-                    url             TEXT    PRIMARY KEY NOT NULL,
-                    status          INT     DEFAULT 0,
-                    redirect_url    TEXT
-                )''')
-
-    cursor.execute('''CREATE TABLE IF NOT EXISTS articles (
-                    original_article_url    TEXT    NOT NULL PRIMARY KEY,
-                    article_url             TEXT    NOT NULL,
-                    arquivo_source_url      TEXT    NOT NULL,
-                    title                   TEXT    NOT NULL,
-                    source                  TEXT    NOT NULL,
-                    day                     INT     NOT NULL,
-                    month                   INT     NOT NULL,
-                    year                    INT     NOT NULL,
-                    category                TEXT    NOT NULL,
-                    importance              INT,
-                    headline                TEXT,
-                    snippet                 TEXT,
-                    img_url                 TEXT,
-                    FOREIGN KEY(article_url) REFERENCES urls(url),
-                    FOREIGN KEY(img_url) REFERENCES urls(url)
-                )''')
-
-    cursor.connection.commit()
-
-
-def scrape_source(scraper, source, cursor, db_insert=True):
-    for file in sorted([p for p in pathlib.Path(os.path.join('crawled', source, 'pages')).iterdir() if p.is_file() and p.name != '.DS_Store']):
-        filename = file.name.replace('.html', '')
-        print(filename)
-
-        elems = filename.split('-')
-        date = elems[0]
-        is_https = elems[1] == 's'
-        actual_url = decode_url(elems[2]) if len(elems) > 2 else None
-
-        # dev only
-        # if int(date) < 20151202180210:
-        #     continue
-
-        with open(file) as f:
-            content = f.read()
-
-        news, minimum_news = scraper.scrape_page(source, date, content)
-        if news is None:  # ignore dummy scrapers, and undefined scrapers past tolerance date
-            continue
-
-        if len(news) < minimum_news:  # useful to detect when a parser stops working
-            raise Exception('So few news here!')
-
-        source_url = actual_url or source
-
-        for n in news:
-            # timestamp can be provided in news if using dummy parser, else get it from filename
-            timestamp = str(n.get('timestamp') or date)
-
-            # parse the url to the original article, a lot of times it's relative to the original website's root
-            article_url = make_absolute(source_url, timestamp, is_https, n['article_url'])
-
-            # source is only present for news aggregators, so if not present deduce it from filename
-            article_source = bind_source(n.get('source') or source_name_from_file(source))
-
-            # bind category to a common set
-            category = bind_category(n['category']).value
-
-            # add the link to where we got the article from (our source of knowledge)
-            # sometimes the source url might be defined by hand (eg when the article is not in the crawled archives, or not on the newpaper's main page)
-            arquivo_source_url = n.get('arquivo_source_url') or 'https://arquivo.pt/wayback/{}/http{}://{}/'.format(timestamp, 's' if is_https else '', source_url)
-
-            # the original link to the article should be unique for each one, thus indicating its uniqueness
-            # (article_url does not work, as two different snapshots would have different links pointing to the same)
-            original_article_url = get_original_news_url(article_url)
-
-            # convert noFrame url to wayback (with sidebar) for UI purposes
-            article_url = article_url.replace('noFrame/replay', 'wayback')
-
-            #  title, pretitle and snippet cleanups
-            title = prettify_title(n['title'])
-            if ignore_title(title):
-                continue
-
-            pretitle = prettify_title(n.get('headline') or n.get('pretitle'))
-            if ignore_pretitle(pretitle):
-                continue
-
-            snippet = prettify_text(n.get('snippet'))
-            if ignore_snippet(snippet):
-                continue
-
-            print('{}; {}; {} / {}; {} / {}; {}'.format(title, pretitle, snippet, category, article_source, article_url, n.get('img_url')))
-
-            # add article to DB
-            if not db_insert:
-                continue
-
-            cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (article_url,))
-
-            img_url = None
-            if n.get('img_url'):
-                img_url = make_absolute(source_url, timestamp, is_https, n['img_url'])
-                cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (img_url,))
-
-            # ignores already-inserted news (article url is unique for each article)
-            # assumes sequencial insertion to preserver only earliest occurence of the article
-            cursor.execute('''INSERT OR IGNORE INTO articles(original_article_url, article_url,arquivo_source_url,title,source,day,month,year,category,importance,headline,snippet,img_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-                           (original_article_url, article_url, arquivo_source_url, title, article_source, timestamp[6:8], timestamp[4:6], timestamp[:4], category, n.get('importance'), pretitle, snippet, img_url))
-            cursor.connection.commit()
-
-
-def main():
-    conn = sqlite3.connect('parsed_articles.db')
-    cursor = conn.cursor()
-    create_database(cursor)
-
-    # init scraping machine
+def init_scraper():
     scraper = ScraperCentral()
     scraper.register_scraper(ScraperGoogleNews01)
     scraper.register_scraper(ScraperGoogleNews02)
@@ -307,22 +170,172 @@ def main():
     scraper.register_scraper(ScraperRenascenca03)
     scraper.register_scraper(ScraperRenascenca04)
     scraper.register_scraper(ScraperRenascenca05)
+    return scraper
+
+
+def check_urls(cursor):
+    urls = cursor.execute('''SELECT url FROM urls WHERE status = 0''').fetchall()
+
+    for url in [url[0] for url in urls if not url[0].startswith('no-article-url')]:
+        # noFrame gives us the actual status code
+        # also remove the db uniqueness key
+        no_frame_url = remove_destaques_uniqueness(url.replace('arquivo.pt/wayback', 'arquivo.pt/noFrame/replay'))
+
+        try:
+            r = requests.head(no_frame_url, allow_redirects=True)
+            status = r.status_code
+
+            # fix bug where 200 is returned for an image, but there's actually a 404
+            if status == 200 and 'text/html' in r.headers['Content-Type']:
+                status = 404
+
+            if no_frame_url.endswith('icn_comentario_fff.gif') or no_frame_url.endswith('spacer.gif'):
+                status = 404
+
+            cursor.execute('UPDATE urls SET status = ?, redirect_url = ? WHERE url = ?', (status, r.url, url))
+            cursor.connection.commit()
+        except Exception as e:
+            print(no_frame_url)
+            print(e)
+
+
+def create_database(cursor):
+    cursor.execute('PRAGMA foreign_keys = ON')
+
+    cursor.execute('''CREATE TABLE IF NOT EXISTS urls (
+                    url             TEXT    PRIMARY KEY NOT NULL,
+                    status          INT     DEFAULT 0,
+                    redirect_url    TEXT
+                )''')
+
+    cursor.execute('''CREATE TABLE IF NOT EXISTS articles (
+                    original_article_url    TEXT    NOT NULL PRIMARY KEY,
+                    article_url             TEXT    NOT NULL,
+                    arquivo_source_url      TEXT    NOT NULL,
+                    title                   TEXT    NOT NULL,
+                    source                  TEXT    NOT NULL,
+                    day                     INT     NOT NULL,
+                    month                   INT     NOT NULL,
+                    year                    INT     NOT NULL,
+                    category                TEXT    NOT NULL,
+                    importance              INT,
+                    headline                TEXT,
+                    snippet                 TEXT,
+                    img_url                 TEXT,
+                    FOREIGN KEY(article_url) REFERENCES urls(url),
+                    FOREIGN KEY(img_url) REFERENCES urls(url)
+                )''')
+
+    cursor.connection.commit()
+
+
+def scrape_source(scraper, cursor, source, insert_db, print_articles):
+    for file in sorted([p for p in pathlib.Path(os.path.join('crawled', source, 'pages')).iterdir() if p.is_file() and p.name != '.DS_Store']):
+        filename = file.name.replace('.html', '')
+        print(filename)
+
+        elems = filename.split('-')
+        date = elems[0]
+        is_https = elems[1] == 's'
+        actual_url = decode_url(elems[2]) if len(elems) > 2 else None
+
+        # dev only
+        # if int(date) < 20160423170211:
+        #     continue
+
+        with open(file) as f:
+            content = f.read()
+
+        news, minimum_news = scraper.scrape_page(source, date, content)
+        if news is None:  # ignore dummy scrapers, and undefined scrapers past tolerance date
+            continue
+
+        if len(news) < minimum_news:  # useful to detect when a parser stops working
+            raise Exception('So few news here!')
+
+        source_url = actual_url or source
+
+        for n in news:
+            # timestamp can be provided in news if using dummy parser, else get it from filename
+            timestamp = str(n.get('timestamp') or date)
+
+            # parse the url to the original article, a lot of times it's relative to the original website's root
+            article_url = make_absolute(source_url, timestamp, is_https, n['article_url'])
+
+            # source is only present for news aggregators, so if not present deduce it from filename
+            article_source = bind_source(n.get('source') or source_name_from_file(source))
+
+            # bind category to a common set
+            category = bind_category(n['category']).value
+
+            # add the link to where we got the article from (our source of knowledge)
+            # sometimes the source url might be defined by hand (eg when the article is not in the crawled archives, or not on the newpaper's main page)
+            arquivo_source_url = n.get('arquivo_source_url') or 'https://arquivo.pt/wayback/{}/http{}://{}/'.format(timestamp, 's' if is_https else '', source_url)
+
+            # the original link to the article should be unique for each one, thus indicating its uniqueness
+            # (article_url does not work, as two different snapshots would have different links pointing to the same)
+            original_article_url = get_original_news_url(article_url)
+
+            # convert noFrame url to wayback (with sidebar) for UI purposes
+            article_url = article_url.replace('noFrame/replay', 'wayback')
+
+            #  title, pretitle and snippet cleanups
+            title = prettify_title(n['title'])
+            if ignore_title(title):
+                continue
+
+            pretitle = prettify_title(n.get('headline') or n.get('pretitle'))
+            if ignore_pretitle(pretitle):
+                continue
+
+            snippet = prettify_text(n.get('snippet'))
+            if ignore_snippet(snippet):
+                continue
+
+            if print_articles:
+                print('{}; {}; {} / {}; {} / {}; {}'.format(title, pretitle, snippet, category, article_source, article_url, n.get('img_url')))
+
+            # add article to DB
+            if not insert_db:
+                continue
+
+            cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (article_url,))
+
+            img_url = None  # must be set to None to ensure no empty but not-None variables pass through
+            if n.get('img_url'):
+                img_url = make_absolute(source_url, timestamp, is_https, n['img_url'])
+                cursor.execute('''INSERT OR IGNORE INTO urls(url) VALUES (?)''', (img_url,))
+
+            # ignores already-inserted news (article url is unique for each article)
+            # assumes sequencial insertion to preserver only earliest occurence of the article
+            cursor.execute('''INSERT OR IGNORE INTO articles(original_article_url, article_url,arquivo_source_url,title,source,day,month,year,category,importance,headline,snippet,img_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''',
+                           (original_article_url, article_url, arquivo_source_url, title, article_source, timestamp[6:8], timestamp[4:6], timestamp[:4], category, n.get('importance'), pretitle, snippet, img_url))
+            cursor.connection.commit()
+
+
+def main(db_name, insert_db, print_articles):
+    conn = sqlite3.connect(db_name)
+    cursor = conn.cursor()
+    create_database(cursor)
+
+    # init scraping machine
+    scraper = init_scraper()
 
     # get scraping
-    scrape_source(scraper, 'news.google.pt', cursor)
-    scrape_source(scraper, 'publico.pt', cursor)
-    scrape_source(scraper, 'portugaldiario.iol.pt', cursor)
-    scrape_source(scraper, 'jn.pt', cursor)
-    scrape_source(scraper, 'expresso.pt', cursor)
-    scrape_source(scraper, 'dn.pt', cursor)
-    scrape_source(scraper, 'aeiou.pt', cursor)
-    scrape_source(scraper, 'noticias.sapo.pt', cursor)
-    scrape_source(scraper, 'diariodigital.pt', cursor)
-    scrape_source(scraper, 'tsf.pt', cursor)
-    scrape_source(scraper, 'ultimahora.publico.pt', cursor)
-    scrape_source(scraper, 'rtp.pt', cursor)
-    scrape_source(scraper, 'noticias.rtp.pt', cursor)
-    scrape_source(scraper, 'rr.pt', cursor)
+    scrape_source(scraper, cursor, 'news.google.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'publico.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'portugaldiario.iol.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'jn.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'expresso.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'dn.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'aeiou.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'noticias.sapo.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'diariodigital.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'tsf.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'ultimahora.publico.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'rtp.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'noticias.rtp.pt', insert_db, print_articles)
+    scrape_source(scraper, cursor, 'rr.pt', insert_db, print_articles)
 
     # check urls for their status and final destination (in case they're a redirect)
     check_urls(cursor)
@@ -331,4 +344,4 @@ def main():
     conn.close()
 
 
-main()
+main('parsed_articles.db', True, False)

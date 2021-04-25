@@ -1,7 +1,13 @@
 import json
 import sqlite3
+import threading
 
 from src.util import remove_destaques_uniqueness
+
+
+def split(a, n):
+    k, m = divmod(len(a), n)
+    return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
 
 def count_category(cursor, day, month, category):
@@ -63,28 +69,22 @@ def get_day_stats(cursor, day, month):
     }
 
 
-def main():
-    conn = sqlite3.connect('parsed_articles.db')
-    cursor = conn.cursor()
-    days = cursor.execute('SELECT DISTINCT day,month FROM articles ORDER BY month,day').fetchall()
-
-    totals = []
-    snippet = []
-    img = []
-    large_cats = []
-    medium_cats = []
-    small_cats = []
+def produce_output(cursor, global_stats, days):
+    # threads only
+    if not cursor:
+        cursor = sqlite3.connect('parsed_articles.db').cursor()
 
     for day, month in days:
         print('{:02}/{:02}'.format(day, month))
         stats = get_day_stats(cursor, day, month)
 
-        totals.append(stats['total'])
-        snippet.append(stats['snippets'])
-        img.append(stats['imgs'])
-        large_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['large'] >= 2 and stats['categories'][c]['total'] >= 6]))
-        medium_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['large'] >= 1 and stats['categories'][c]['total'] >= 3]))
-        small_cats.append(len([c for c in stats['categories'] if stats['categories'][c]['total'] >= 4]))
+        if global_stats:
+            global_stats['totals'].append(stats['total'])
+            global_stats['snippet'].append(stats['snippets'])
+            global_stats['img'].append(stats['imgs'])
+            global_stats['large_cats'].append(len([c for c in stats['categories'] if stats['categories'][c]['large'] >= 2 and stats['categories'][c]['total'] >= 6]))
+            global_stats['medium_cats'].append(len([c for c in stats['categories'] if stats['categories'][c]['large'] >= 1 and stats['categories'][c]['total'] >= 3]))
+            global_stats['small_cats'].append(len([c for c in stats['categories'] if stats['categories'][c]['total'] >= 4]))
 
         # write file
         res = cursor.execute('''SELECT
@@ -131,9 +131,40 @@ def main():
                 'metadata': stats,
                 'articles': daily_news
             }))
+
+
+def main(thread_count=1):
+    conn = sqlite3.connect('parsed_articles.db')
+    cursor = conn.cursor()
+    days = cursor.execute('SELECT DISTINCT day,month FROM articles ORDER BY month,day').fetchall()
+
+    global_stats = {
+        'totals': [],
+        'snippet': [],
+        'img': [],
+        'large_cats': [],
+        'medium_cats': [],
+        'small_cats': []
+    }
+
+    if thread_count > 1:
+        parts = list(split(days, thread_count))
+
+        thread_objs = []
+        for i in range(thread_count):
+            thread = threading.Thread(target=produce_output, args=(None, None, parts[i]))
+            thread.start()
+            thread_objs.append((thread, conn))
+
+        for t, conn in thread_objs:
+            t.join()
+            conn.close()
+    else:
+        produce_output(cursor, global_stats, days)
+        print('{} {} {} / {} {} {}'.format(min(global_stats['totals']), min(global_stats['snippet']),  min(global_stats['img']), min(global_stats['large_cats']), min(global_stats['medium_cats']), min(global_stats['small_cats'])))
+
+    # close main connection
     conn.close()
 
-    print('{} {} {} / {} {} {}'.format(min(totals), min(snippet), min(img), min(large_cats), min(medium_cats), min(small_cats)))
 
-
-main()
+main(8)

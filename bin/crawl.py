@@ -162,14 +162,15 @@ def get_page(url, encoding):
     return content, actual_url
 
 
-def crawl_source(source, download=True):
+def crawl_source(source, download_files, download_images):
     print('Crawl ' + source['site'] + (source.get('path') or ''))
 
     img_dir = os.path.join('crawled', source.get('target') or source['site'], 'screenshots')
     page_dir = os.path.join('crawled', source.get('target') or source['site'], 'pages')
 
-    if download:
+    if download_images:
         pathlib.Path(img_dir).mkdir(parents=True, exist_ok=True)
+    if download_files:
         pathlib.Path(page_dir).mkdir(parents=True, exist_ok=True)
 
     snapshots = get_snapshot_list_cdx(source)
@@ -186,44 +187,43 @@ def crawl_source(source, download=True):
         calendar_day = snapshot['tstamp'][4:8]
         days[calendar_day] += 1
 
-        if download:
+        https = '-s' if is_https_link(snapshot['linkToArchive']) else '-p'
+
+        # use this if for some reason need to request a different link for a day
+        special_url = get_special(source, snapshot['tstamp'])
+
+        # save screenshot and source code
+        img = os.path.join(img_dir, snapshot['tstamp'] + https + '.png')
+        if not os.path.exists(img) and download_images:
+            snapshot_link = snapshot['linkToScreenshot']
+            if special_url:
+                snapshot_link += special_url
+
+            r = requests.get(snapshot_link)
+            with open(img, 'wb') as f:
+                f.write(r.content)
+
+        # only download if no file starting by the current timestamp exists
+        page = os.path.join(page_dir, snapshot['tstamp'] + https + '*.html')  # '*' for glob only
+        if len(glob(page)) == 0 and download_files:
             downloads += 1
-            https = '-s' if is_https_link(snapshot['linkToArchive']) else '-p'
+            link = snapshot['linkToNoFrame']
+            if special_url:
+                link += special_url
 
-            # use this if for some reason need to request a different link for a day
-            special_url = get_special(source, snapshot['tstamp'])
+            # get page content
+            encoding = get_encoding(source, snapshot['tstamp'])
+            content, actual_url = get_page(link, encoding)
 
-            # save screenshot and source code
-            img = os.path.join(img_dir, snapshot['tstamp'] + https + '.png')
-            if not os.path.exists(img):
-                snapshot_link = snapshot['linkToScreenshot']
-                if special_url:
-                    snapshot_link += special_url
+            # get the actual url
+            if actual_url:
+                actual_url = encode_url(actual_url + (source.get('path') or ''))
+                page = os.path.join(page_dir, snapshot['tstamp'] + https + '-' + actual_url + '.html')
+            else:
+                page = os.path.join(page_dir, snapshot['tstamp'] + https + '.html')
 
-                r = requests.get(snapshot_link)
-                with open(img, 'wb') as f:
-                    f.write(r.content)
-
-            # only download if no file starting by the current timestamp exists
-            page = os.path.join(page_dir, snapshot['tstamp'] + https + '*.html')  # '*' for glob only
-            if len(glob(page)) == 0:
-                link = snapshot['linkToNoFrame']
-                if special_url:
-                    link += special_url
-
-                # get page content
-                encoding = get_encoding(source, snapshot['tstamp'])
-                content, actual_url = get_page(link, encoding)
-
-                # get the actual url
-                if actual_url:
-                    actual_url = encode_url(actual_url + (source.get('path') or ''))
-                    page = os.path.join(page_dir, snapshot['tstamp'] + https + '-' + actual_url + '.html')
-                else:
-                    page = os.path.join(page_dir, snapshot['tstamp'] + https + '.html')
-
-                with open(page, 'w') as f:
-                    f.write(content)
+            with open(page, 'w') as f:
+                f.write(content)
 
     print('\tTotal downloaded {}'.format(downloads))
     # print('\tTotal reqs ' + str(reqs))
@@ -233,7 +233,7 @@ def crawl_source(source, download=True):
     return stats, len(snapshots), days
 
 
-def crawl_all(sources):
+def crawl_all(sources, download_files, download_images):
     all_years = Counter()
     all_days = Counter()
     first = 2020
@@ -242,7 +242,7 @@ def crawl_all(sources):
     all_months = Counter()
 
     for source in sources:
-        res = crawl_source(source)
+        res = crawl_source(source, download_files, download_images)
         if not res:
             continue
 
@@ -275,4 +275,4 @@ def crawl_all(sources):
 
 
 # configurations are in config/sources.py
-crawl_all(news_sources)
+crawl_all(news_sources, True, False)

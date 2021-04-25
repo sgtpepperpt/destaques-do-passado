@@ -18,6 +18,32 @@ conjunto de scrapers definido no directório `src/scrapers`. Cada scraper suport
 suportar pequenas variações no design da página. Algumas versões, por serem demasiado irregulares, e por terem menos
 conteúdo, têm o seu conteúdo pre-processado manualmente, e entregue ao script via um scraper chamado "dummy".
 
+## Extender o scraper
+O mecanismo de scraping foi feito para ser facilmente extendido para novas fontes de notícias, bem como para adicionar
+facilmente anos mais recentes às fontes mais existentes.
+
+Para adicionar uma nova fonte deverá editar o ficheiro `src/config.py`.
+
+Para adicionar nos scrapers (por exemplo, para versões mais recentes de fontes existentes), deverá escrever um scraper
+com o seguinte formato:
+```
+class ScraperFonte01(NewsScraper):
+    source = 'rtp.pt'        # nome da directoria em crawled/"source"
+    cutoff = 20151231180236  # timestamp da última versão suportada pelo scraper (vários scrapers são ordenados por este parâmetro)
+    minimum_news = 1         # número mínimo de notícias esperadas (OPCIONAL)
+
+    # este método deverá ser implementado por todos os scrapers
+    # recebe um objecto BeautifulSoup
+    # retorna uma lista de dicionários com a interface descrita em https://destaquesdopassado.pt/api
+    def scrape_page(self, soup):
+        all_news = []
+        return all_news
+```
+
+De seguida bastará registar o scraper em `bin/scrape.py`. A ordem pela qual são registados é irrelevante, já que a
+ordenação é dada pelo parâmetro `cutoff`: para cada ficheiro com timestamp *t* o programa irá escolher o scraper com
+cutoff menor de todos aqueles que são maiores ou iguais a *t*.
+
 ## Obter estatísticas
 ```
 -- gráficos

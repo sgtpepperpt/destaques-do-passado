@@ -467,7 +467,7 @@ class ScraperTSF09(NewsScraper):
         img_url = img_elem.find('img').get('src') if img_elem and img_elem.find('img') else None  # extrac check for img because of 20131102170242
 
         pretitle_elem = article_elem.find('a', class_='taglnk')
-        pretitle = pretitle_elem.find('img').get('alt') if pretitle_elem else None
+        pretitle = pretitle_elem.find('img').get('alt').title() if pretitle_elem else None
 
         title_elem = article_elem.find('a', class_='titlnk')
         title = title_elem.get_text() if title_elem else None  # 20110422150224, almost empty page
