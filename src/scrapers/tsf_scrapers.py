@@ -511,7 +511,7 @@ class ScraperTSF09(NewsScraper):
         feature_articles = soup.find_all('div', id=re.compile(r'^tabf_[0-9]{7}$'))
         for article_elem in feature_articles:
             pretitle_elem = article_elem.find('a', class_='txttag')
-            pretitle = pretitle_elem.get_text() if pretitle_elem else None  # 20110510150233
+            pretitle = pretitle_elem.get_text().title() if pretitle_elem else None  # 20110510150233
 
             title_elem = article_elem.find('div', class_='hl_header').find('a')
             url = title_elem.get('href') or generate_dummy_url(self.source, 'tsf09', 'FeatureTop', title_elem)  # no url @ 20120701150249

@@ -2,7 +2,7 @@ def bind_source(source_text):
     if source_text in ['Público.pt (Assinatura', 'Público.pt']:
         return 'Público'
 
-    if source_text.startswith('Diário de Notícias') or source_text in ['DN']:  # google news has Diário de Notícias - Lisboa
+    if source_text.startswith('Diário de Notícias -') or source_text in ['DN']:  # google news has Diário de Notícias - Lisboa
         return 'Diário de Notícias'
 
     if source_text.startswith('Jornal de Notícias') or source_text in ['JN Mobile']:
@@ -41,14 +41,20 @@ def bind_source(source_text):
     if source_text.lower().startswith('blitz'):
         return 'BLITZ'
 
+    if source_text.lower().startswith('nit new'):
+        return 'NiT New in Town'
+
     if 'aeiou' in source_text.lower():
         return 'AEIOU'
 
-    if source_text in ['Ionline']:
+    if source_text in ['Ionline', 'I Online', 'iOnline', 'i Informação']:
         return 'iOnline'
 
     if source_text in ['OJogo', 'O JOGO', 'o Jogo', 'O Jogo Online']:
         return 'O Jogo'
+
+    if source_text in ['Mensageiro de Braganca']:
+        return 'Mensageiro de Bragança'
 
     if source_text in ['ABola']:
         return 'A Bola'
@@ -68,7 +74,7 @@ def bind_source(source_text):
     if source_text in ['quiosque']:
         return 'Quiosque'
 
-    if source_text in ['Diário Digital P']:
+    if source_text in ['Diário Digital P', 'DD']:
         return 'Diário Digital'
 
     if source_text in ['Boas Noticias']:
