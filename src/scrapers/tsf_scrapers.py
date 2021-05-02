@@ -464,7 +464,10 @@ class ScraperTSF09(NewsScraper):
         if img_elem and img_elem.find('script'):
             return  # ignore flash player articles
 
-        img_url = img_elem.find('img').get('src') if img_elem and img_elem.find('img') else None  # extrac check for img because of 20131102170242
+        img_url = None
+        if img_elem and img_elem.find('img') and not img_elem.find('img').get('src').endswith('1x1t.gif'):
+            # extra check for img because of 20131102170242; gif because of 20110501150229
+            img_url = img_elem.find('img').get('src')
 
         pretitle_elem = article_elem.find('a', class_='taglnk')
         pretitle = pretitle_elem.find('img').get('alt').title() if pretitle_elem else None

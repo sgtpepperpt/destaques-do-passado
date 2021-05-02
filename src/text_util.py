@@ -91,7 +91,8 @@ def prettify_text(text):
 
     # remove more clutter
     to_remove = ['IMPRIMIR(0). ENVIAR. TAGS.', '(Em actualização) - ', '( ler artigo',
-                 'PUB. Global Imagens. Lusa. Facebook · Twitter; Imprimir. Partilhar; Comentar.', 'IMPRIMIR(0).']
+                 'PUB. Global Imagens. Lusa. Facebook · Twitter; Imprimir. Partilhar; Comentar.', 'IMPRIMIR(0).',
+                 'Filipe Casaca. 0. Tópicos · Justiça · Supremo Tribunal de Justiça · Polícia Judiciária · Ministério Público · Crianças · Portimão.']
     for elem in to_remove:
         text = text.replace(elem, '')
 
@@ -120,7 +121,7 @@ def ignore_title(title):
                      'SAPO renova', 'Mitrologia: ', 'Passatempo: ', 'Diário Digital muda', 'A sua opinião:',
                      'Renascença nomeada', 'Opinião de', 'Acha que sabe', 'Em directo:', 'Nota da Renascença',
                      'Tem dúvidas sobre', 'Fim-de-semana de portas', 'Análise:', 'Os negócios da comida', 'Guia de',
-                     'Boa Cama: Termine o Verão', 'Cruzadas (']
+                     'Boa Cama: Termine o Verão', 'Cruzadas (', 'Hoje é Notícia']
 
     ignore_contains = ['(exclusivo assinantes)', 'Veja o vídeo', 'e o novo Expresso', 'com o Expresso',
                        'para a casa ir abaixo', 'Expresso Diário', 'dicas para', 'A 1ª página do Expresso',
