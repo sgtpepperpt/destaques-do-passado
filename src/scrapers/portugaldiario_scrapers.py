@@ -95,6 +95,9 @@ class ScraperPortugalDiario02(NewsScraper):
                     headline = None
                     title = top.get_text()
 
+                if headline == title:
+                    headline = None
+
                 # bottom has snippet and img (sometimes)
                 bottom = rows[1].find('td').find('span')
                 source = None

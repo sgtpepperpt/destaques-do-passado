@@ -1,7 +1,7 @@
 # Destaques do Passado
 
 Conjunto de scrapers usados para extracção de notícias portuguesas do [Arquivo.pt](https://arquivo.pt), presentes no 
-site e repositório [Destaques do Passado](https://destaquesdopassado.pt).
+sítio e repositório [Destaques do Passado](https://destaquesdopassado.pt).
 
 Criado por Guilherme Borges em 2021.
 
@@ -20,12 +20,12 @@ conteúdo, têm o seu conteúdo pre-processado manualmente, e entregue ao script
 
 ## Extender o scraper
 O mecanismo de scraping foi feito para ser facilmente extendido para novas fontes de notícias, bem como para adicionar
-facilmente anos mais recentes às fontes mais existentes.
+facilmente anos mais recentes às fontes já existentes.
 
 Para adicionar uma nova fonte deverá editar o ficheiro `src/config.py`.
 
-Para adicionar nos scrapers (por exemplo, para versões mais recentes de fontes existentes), deverá escrever um scraper
-com o seguinte formato:
+Para adicionar um scraper (por exemplo, para versões mais recentes de fontes existentes), deverá
+seguir o seguinte formato:
 ```
 class ScraperFonte01(NewsScraper):
     source = 'rtp.pt'        # nome da directoria em crawled/"source"

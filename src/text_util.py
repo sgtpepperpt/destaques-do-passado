@@ -167,7 +167,7 @@ def ignore_snippet(snippet):
     if not snippet:
         return False
 
-    ignore_contains = ['Ideias para este']
+    ignore_contains = ['Ideias para este', 'o EXPRESSO oferece-lhe']
 
     for forbidden in ignore_contains:
         if forbidden.lower() in snippet.lower():
